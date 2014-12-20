@@ -1,0 +1,255 @@
+/* CSS Stylesheet for Javascript Turing machine simulator */
+
+body {
+  text-align: center;
+}
+
+#Machine {
+  border: 1px dashed red;
+  background-color: #dfdfda;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  margin-left: 1%;
+  margin-right: 1%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 90%;
+/*  height: 10em; */
+  text-align: center;
+}
+
+.MachineStatusBox {
+  border: 1px solid grey;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  margin-top: 5px;
+  margin-bottom: 8px;
+/*  text-align: center; */
+  font-family: "Courier New", courier;
+}
+
+#MachineTape {
+  background-color: #eee8aa;
+  height: 2em;
+  margin-left: 5%;
+  margin-right: 5%;
+  width: 90%;
+  font-size: x-large;
+  margin-bottom: 2em;
+  overflow: auto;
+}
+
+.tape {
+  display: inline;
+  font-family: "Courier New", courier;
+  padding: 0;
+  margin: 0;
+}
+
+#LeftTape {
+  text-align: right;
+}
+
+#RightTape {
+  text-align: left;
+}
+
+#ActiveTape {
+  color: red;
+  border: 1px solid LightGrey;
+  font-weight: bold;
+  background-color: #bbf8ff;
+}
+
+#ActiveTapeArea {
+  position: relative;
+  display: inline;
+  padding: 0;
+  margin: 0;
+}
+
+#RunningTapeDisplay {
+}
+
+#InitialTapeDisplay {
+  visibility: none;
+}
+
+#MachineStateContainer {
+  text-align: left;
+  width: 100px;
+  float: left;
+  position: relative;
+  top: -1em;
+}
+
+#MachineState {
+  background-color: #90ee90;
+  text-align: center;
+  display: block;
+  width: 100%;
+  float: left;
+}
+
+#MachineStatusLowerBlock {
+  text-align: center;
+  height: 4em;
+  position: relative;
+  width: 100%;
+}
+
+#MachineStatusMessagesContainer {
+  text-align: center;
+  width: 60%;
+  height: 3em;
+  display: inline;
+  position: relative;
+/*  bottom: -2em; */
+  font-size: larger;
+}
+
+#MachineStepsContainer {
+  text-align: left;
+  float: right;
+  width: 100px;
+  position: relative;
+  top: -1em;
+}
+
+#MachineSteps {
+  background-color: #90ee90;
+  text-align: center;
+  float: right;
+  display: block;
+  width: 100%;
+  float: right;
+}
+
+#MachineControlBlock {
+}
+
+#MachineProgramBlock {
+  padding-left: 50px;
+  padding-right: 250px;
+  text-align: center;
+/*  max-width: 75%;*/
+  overflow: hidden;
+/*  border: 1px solid red; */
+}
+
+#MachineButtonsBlock {
+  width: 200px;
+  float: right;
+  text-align: left;
+  margin-left: 50px;
+}
+
+
+#LoadBlock {
+	padding-left: 40px;
+}
+
+#MachineHead {
+  position: absolute;
+/*  left: -50%; */ /* Note: This works properly on Firefox but not on Chrome, IE - due to bugs? */
+  left: -9px; /* Using this because of Chrome, IE bugs - see above */
+  top: 100%;
+  width: 32px;
+/*  display: none; */
+}
+
+/* Triangle using css tricks */
+.HeadTop {
+  height: 10px;
+  width: 0px;
+}
+
+/* Arrow outline */
+.HeadTop:before {
+  position: absolute;
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 17px solid transparent;
+  border-right: 17px solid transparent;
+  border-bottom: 10px solid #333333;
+}
+
+/* Arrow interior */
+.HeadTop:after {
+  position: absolute;
+  content: "";
+  width: 0;
+  height: 0;
+  margin-top:1px;
+  margin-left:2px;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 9px solid #ff9933;
+}
+
+.HeadBody {
+  width: 32px;
+  height: 14px;
+  text-align: center;
+  font-size: small;
+  background: #ff9933;
+  border-left: 1px solid #333333;
+  border-right: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+}
+
+
+
+
+/** Miscellaneous **/
+#IntroText {
+  text-align: left;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+h1 {
+  margin-bottom: 0.2em;
+}
+
+#SyntaxInfo {
+  text-align: left;
+  margin-left: 2em;
+}
+
+ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.backlinks {
+  text-align: center;
+  margin-bottom: 0.2em;
+}
+
+.Signature {
+  text-align: right;
+  font-style: italic;
+  font-size: smaller;
+}
+
+#debugOuter {
+  clear: both;
+}
+
+.DebugClass {
+  display: none;
+}
+
+.clear {
+  clear: both;
+}
+
+.disabled {
+  color: grey;
+}

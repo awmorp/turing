@@ -1,0 +1,143 @@
+<html>
+ <head>
+  <link href="turing.css" rel="stylesheet" type="text/css">
+  <link href="textarea.css" rel="stylesheet" type="text/css">
+  <title>
+   Turing machine simulator
+  </title>
+  <script type="text/javascript" defer="defer" src="jquery-1.11.1.js"></script>
+  <script type="text/javascript" defer="defer" src="jsturing.js"></script>
+ </head>
+
+ <body onload="OnLoad();">
+  <div id="Header">
+   <h1>Turing machine simulator</h1>
+   <div class="backlinks">
+    [<a href="../default.html">Back to home page</a>]
+   </div>
+   <div id="IntroText">
+    This is a <a href="http://en.wikipedia.org/wiki/Turing_machine">Turing machine</a> simulator, written in JavaScript.
+    To use it:<br>
+    <ol>
+     <li>
+      Load one of the example programs, or write your own in the Turing machine program area below.
+     </li>
+     <li>
+      Enter something in the 'Initial input' area - this will be written on the tape initially as input to the machine. Click 'Reset' to initialise the machine.
+     </li>
+     <li>
+      Click on 'Run' to start the Turing machine and run it until it halts (if ever).
+      Click on 'Pause' to interrupt the Turing machine while it is running.
+      Alternately, click 'Step' to run a single step of the Turing machine.
+     </li>
+     <li>
+      Click 'Reset' to restore the Turing machine to its initial state so it can be run again.
+     </li>
+    </ol>
+   </div>
+  </div>
+  <div id="Machine">
+   <div>
+    <div>
+     Tape:
+    </div>
+    <div id="MachineTape" class="MachineStatusBox"><!-- the following pre elements must be on a single line with no whitespace between them !-->
+     <div id="RunningTapeDisplay">
+      <pre id="LeftTape" class="tape"></pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"></pre><div id="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"></pre>
+     </div>
+    </div> <!-- div MachineTape !-->
+   </div>
+   <div id="MachineStatusLowerBlock">
+    <pre id="MachineStatusMessagesContainer">
+    Choose a program and click Run!
+    </pre> <!-- div MachineStatusMessagesContainer !-->
+    <div id="MachineStateContainer">
+     Current state:
+     <div id="MachineState" class="MachineStatusBox">
+      Machine state
+     </div> <!-- div MachineState !-->
+    </div> <!-- div MachineStateContainer !-->
+    <div id="MachineStepsContainer">
+     Steps:
+     <div id="MachineSteps" class="MachineStatusBox">
+      Machine steps
+     </div> <!-- div MachineSteps !-->
+    </div> <!-- div MachineStepsContainer !-->
+   </div> <!-- div MachineStatusLowerBlock !-->
+
+   <div id="MachineControlBlock">
+
+    <div id="MachineButtonsBlock">
+     <br>
+     Controls:<br>
+     <button id="StepButton" onclick="StepButton();">Step</button><br> <!-- &#x25b8;&#x2759; !-->
+     <button id="RunButton" onclick="RunButton();">Run</button> <!-- &#x25b8; !-->
+     <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();"/><span id="SpeedCheckboxLabel">Run at full speed</span><br>
+     <button id="StopButton" onclick="StopButton();" disabled="true">Pause</button><br> <!-- &#x25fe; !-->
+     <button id="ResetButton" onclick="ResetButton();">Reset</button><br> <!-- &#x2759;&#x23ea; !-->
+     <div id="InitialTapeDisplay">
+      Initial input:<input type="text" id="InitialInput" value="abcde"/>
+     </div>
+     <!--<br><button id="DebugButton" onclick="x();" class="DebugClass">Debug</button><br>!-->
+    </div> <!-- div MachineButtonsBlock !-->
+
+    <div id="MachineProgramBlock">
+     Turing machine program:<br>
+     <div id="SourceContainer">
+      <div id="SourceBackground">
+      </div>
+      <div id="tabackground">
+<!-- no indenting, because text inside textarea is verbatim !-->
+<textarea id="Source" wrap="off" oninput="TextareaChanged();" onscroll="UpdateTextareaScroll();" onblur="Compile();">
+; Load a program from the menu below or write your own!
+</textarea>
+      </div>
+     </div> 
+     <div id="SyntaxMsg"></div>
+	 <div id="LoadBlock">
+      Example programs:
+      <select id="LoadSelector">
+       <option value="concatenate">Concatenate strings</option>
+       <option value="binaryadd">Binary addition</option>
+       <option value="binarymult2">Binary multiplication</option>
+       <option value="bin2dec">Binary to decimal conversion</option>
+       <option value="turingsequence">Turing's sequence machine</option>
+       <option value="parentheses">Check parentheses</option>
+       <option value="reversepolishboolean">Reverse polish boolean calculator</option>
+       <option value="primetest">Primality test</option>
+       <option value="4statebeaver">4-state busy beaver</option>
+       <option value="universal">Universal Turing machine</option>
+       <!-- Corresponding program should be stored on the server in a file <value>.txt, eg concatenate.txt !-->
+      </select>
+      <button id="LoadButton" onclick="LoadProgram( document.getElementById( 'LoadSelector' ).value, false );">Load</button>
+     </div> <!-- div inputProg !-->
+     <div class="clear"></div>
+    </div> <!-- div MachineProgramBlock !-->
+   </div> <!-- div MachineControlBlock !-->
+  </div> <!-- div Machine !-->
+  <div id="SyntaxInfo">Syntax:
+   <ul>
+    <li>Each line should contain one tuple of the form '<tt>&lt;current state&gt; &lt;current symbol&gt; &lt;new symbol&gt; &lt;direction&gt; &lt;new state&gt;</tt>'.</li>
+    <li>You can use any number or word for <tt>&lt;current state&gt;</tt> and <tt>&lt;new state&gt;</tt>, eg <tt>0, a, state1</tt>. State labels are case-sensitive.</li>
+    <li><tt>halt</tt> is the halting state. The machine starts in state <tt>0</tt>.</li>
+    <li>You can use any character for <tt>&lt;current symbol&gt;</tt> and <tt>&lt;new symbol&gt;</tt>, or '<tt>_</tt>' to represent blank (space). Symbols are case-sensitive.</li>
+    <li><tt>&lt;direction&gt;</tt> should be '<tt>l</tt>', '<tt>r</tt>' or '<tt>*</tt>', denoting 'move left', 'move right' or 'do not move', respectively.</li>
+    <li>Anything after a '<tt>;</tt>' is a comment and is ignored.</li>
+   </ul>
+   Also:
+   <ul>
+    <li>'<tt>*</tt>' can be used in <tt>&lt;current symbol&gt;</tt> or <tt>&lt;current state&gt;</tt> to match any character or state.</li>
+    <li>'<tt>*</tt>' can be used in <tt>&lt;new symbol&gt;</tt> or <tt>&lt;new state&gt;</tt> to mean 'no change'.</li>
+    <li>'<tt>!</tt>' can be used at the end of a line to set a breakpoint, eg '<tt>1 a b r 2 !</tt>'. The machine will automatically pause after executing this line.</li>
+   </ul>
+  </div>
+  <div class="Signature">
+   -- <a href="../default.html">Anthony Morphett</a> - awmorp @ gmail.com
+  </div>
+  <div id="debugOuter" class="DebugClass">
+   Debug: <button id="ClearDebugButton" onclick="ClearDebug();">clear</button>
+   <pre id="debug">
+   </pre> <!-- div debug !-->
+  </div> <!-- div debugOuter !-->
+ </body>
+</html>

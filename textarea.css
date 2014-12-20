@@ -1,0 +1,201 @@
+#SourceContainer {
+	background-color: transparent;
+	display: inline-block;
+	padding: 0;
+	margin: 0;
+	padding-left: 86px;
+/*	border: 1px solid black;*/
+	position: relative;
+	text-align: left;
+	overflow: hidden;
+/*	width: 100%;*/
+}
+
+#Source {
+	background-color: transparent;
+	display: inline;
+	width: 800px;
+	height: 400px;
+/*	margin-left: 46px; */
+	font-family: monospace;
+	font-size: 15;
+	position: relative;
+}
+
+
+#SourceBackground {
+/*	border: 1px solid red;*/
+	position: absolute;
+	left: 40px;
+	top: 2px;
+	width: 100%;
+	z-index: 0;
+	font-family: monospace;
+	font-size: 15;
+	text-align: left;
+}
+
+#tabackground {
+	background: white;
+	z-index: -4;
+	display: block;
+/*	border: 1px solid green;*/
+}
+
+
+.talinenum {
+	display: inline-block;
+	width: 40px;
+	padding-left: 3px;
+	padding-right: 3px;
+	background-color: darkgrey;
+	text-align: center;
+/*	position: relative; */
+	overflow: hidden;
+}
+
+.talinebg {
+	width: 100%;
+	background-color: white;
+	position: relative;
+}
+
+.talinebg .talinebgnonum {
+	padding-left: 40px;
+}
+
+.talinebgnext {
+	background-color: #bbf8ff;
+}
+
+.talinebgnext > .talinenum {
+/*	background-color: #bbf8ff;*/
+}
+
+.talinebgprev {
+	background-color: #ffcc99;
+}
+
+.talinebgprev > .talinenum {
+/*	background-color: #ffcc99;*/
+}
+
+.talinebgerror {
+	background-color: #ffe0e0;
+}
+
+
+/* 'Next' box */
+#NextLineMarker {
+	border-left: 1px solid #333333;
+	border-top: 1px solid #333333;
+	border-bottom: 1px solid #333333;
+	border-right: 0;
+	position: absolute;
+	left: -40px;
+	top: 1px;
+	width: 38px;
+	height: 14px;
+	background: #bbf8ff;
+	font-family: monospace;
+	font-size: 13;
+/*	display: table-cell;
+	vertical-align: middle; */ /* Not working!? */
+	text-align: left;
+	padding-left: 2px;
+	z-index: 2;
+}
+
+#NextLineMarker.shifted {
+	top: 3px;
+	left: -36px;
+}
+
+/* Arrow outline */
+#NextLineMarkerEnd:before {
+  position: absolute;
+  content: "";
+  top: -1px;
+  left: 40px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid #333333;
+}
+
+/* Arrow interior */
+#NextLineMarkerEnd:after {
+  position: absolute;
+  content: "";
+  width: 0;
+  height: 0;
+  top: -2px;
+  left: 40px;
+  margin-top:2px;
+  margin-left:0px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 7px solid #bbf8ff;
+}
+
+/* 'Prev' box */
+#PrevLineMarker {
+	border-left: 1px solid #333333;
+	border-top: 1px solid #333333;
+	border-bottom: 1px solid #333333;
+	border-right: 0;
+	position: absolute;
+	left: -40px;
+	top: 1px;
+	width: 38px;
+	height: 14px;
+	background: #ffcc99;
+	font-family: monospace;
+	font-size: 13;
+/*	display: table-cell;
+	vertical-align: middle; */ /* Not working!? */
+	text-align: left;
+	padding-left: 2px;
+	z-index: 1;
+}
+
+#PrevLineMarker.shifted {
+	top: -1px;
+}
+
+
+/* Arrow outline */
+#PrevLineMarkerEnd:before {
+  position: absolute;
+  content: "";
+  top: -1px;
+  left: 40px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid #333333;
+}
+
+/* Arrow interior */
+#PrevLineMarkerEnd:after {
+  position: absolute;
+  content: "";
+  width: 0;
+  height: 0;
+  top: -2px;
+  left: 40px;
+  margin-top:2px;
+  margin-left:0px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 7px solid #ffcc99;
+}
+
+/* Syntax error message box */
+#SyntaxMsg {
+/*  background: #ffdddd; */
+  color: #ff0000;
+  width: 100%;
+}
