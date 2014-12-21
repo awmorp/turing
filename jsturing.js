@@ -1,14 +1,11 @@
 /* JavaScript Turing machine emulator */
 /* Anthony Morphett - awmorp@gmail.com */
 
-/* Version 2.0 - September 2014 */
+/* Version 2.0 - December 2014 */
 /* Uses jquery (1.11.1) */
 
-/* TODO:
-  - more example programs: Fibonacci, brainfuck?
-*/
 
-var nDebugLevel = 0;
+var nDebugLevel = 1;
 
 var bFullSpeed = false;   /* If true, run at full speed with no delay between steps */
 
@@ -60,7 +57,7 @@ function Step()
 	bIsReset = false;
 	if( sState.substring(0,4).toLowerCase() == "halt" ) {
 		debug( 1, "Warning: Step() called while in halt state" );
-		UpdateStatusMessage( "Halted." );
+		SetStatusMessage( "Halted." );
 		return( false );
 	}
 	
@@ -80,7 +77,7 @@ function Step()
 	} else {
 		/* No matching rule found; halt */
 		debug( 1, "Warning: no instruction found for state '" + sState + "' symbol '" + sHeadSymbol + "'; halting" );
-		UpdateStatusMessage( "No rule for state '" + sState + "', symbol '" + sHeadSymbol + "'. Halted." );
+		SetStatusMessage( "No rule for state '" + sState + "', symbol '" + sHeadSymbol + "'. Halted." );
 		sNewState = "halt-error";
 		sNewSymbol = sHeadSymbol;
 		nAction = 0;
@@ -102,13 +99,13 @@ function Step()
 	
 	if( sNewState.substring(0,4).toLowerCase() == "halt" ) {
 		if( oInstruction != null ) {
-			UpdateStatusMessage( "Halted." );
+			SetStatusMessage( "Halted." );
 		} 
 		EnableControls( false, false, false, true, true, true );
 		return( false );
 	} else {
 		if( oInstruction.breakpoint ) {
-			UpdateStatusMessage( "Stopped at breakpoint on line " + nLineNumber );
+			SetStatusMessage( "Stopped at breakpoint on line " + nLineNumber );
 			if( hRunTimer != null ) {
 				EnableControls( true, true, false, true, true, true );
 				StopTimer();
@@ -187,6 +184,47 @@ function GetTapeSymbol( n )
 		if( c == " " ) { c = "_"; debug( 4, "GetTapeSymbol() got SPACE not _ !!!" ); }
 		return( c );
 	}
+}
+
+/* GetMachineSnapshot(): Store the current machine and state as an object suitable for saving as JSON */
+function GetMachineSnapshot()
+{
+	return( {
+		"program": oTextarea.value,
+		"state": sState,
+		"tape": sTape,
+		"tapeoffset": nTapeOffset,
+		"headposition": nHeadPosition,
+		"steps": nSteps,
+		"initialtape": $("#InitialInput")[0].value,
+		"fullspeed": bFullSpeed
+	});
+}
+
+/* SetMachineState(): Load a machine and state from an object created by GetMachineSnapshot */
+function SetMachineSnapshot( oObj )
+{
+	if( oObj.program ) oTextarea.value = oObj.program;
+	if( oObj.state ) sState = oObj.state;
+	if( oObj.tape ) sTape = oObj.tape;
+	if( oObj.tapeoffset ) nTapeOffset = oObj.tapeoffset;
+	if( oObj.headposition ) nHeadPosition = oObj.headposition;
+	if( oObj.steps ) nSteps = oObj.steps;
+	if( oObj.initialtape ) $("#InitialInput")[0].value = oObj.initialtape;
+	if( oObj.fullspeed ) {
+		$("#SpeedCheckbox")[0].checked = oObj.fullspeed;
+		bFullSpeed = oObj.fullspeed;
+	}
+	if( sState.substring(0,4).toLowerCase() == "halt" ) {
+		SetStatusMessage( "Halted." );
+		EnableControls( false, false, false, true, true, true );
+	} else {
+		SetStatusMessage( "Machine loaded and ready" );
+		EnableControls( true, true, false, true, true, true );
+	}
+	TextareaChanged();
+	Compile();
+	UpdateInterface();
 }
 
 /* SetTapeSymbol( n, c ): writes symbol c to cell n of the TM tape */
@@ -283,8 +321,8 @@ function RenderLineMarkers()
 	SetActiveLines( (oNextInstruction?oNextInstruction.sourceLineNumber:-1), (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
 }
 
-/* UpdateStatusMessage( sString ): display sString in the status message area */
-function UpdateStatusMessage( sString )
+/* SetStatusMessage( sString ): display sString in the status message area */
+function SetStatusMessage( sString )
 {
 	$("#MachineStatusMessagesContainer" ).html( sString );
 }
@@ -473,7 +511,7 @@ function repeat( c, n )
 function debug( n, str )
 {
 	if( n <= 0 ) {
-		UpdateStatusMessage( str );
+		SetStatusMessage( str );
 	}
 	if( nDebugLevel >= n  ) {
 		$("#debug").append( document.createTextNode( str + "\n" ) );
@@ -505,13 +543,13 @@ function EnableControls( bStep, bRun, bStop, bReset, bSpeed, bTextarea )
 
 function StepButton()
 {
-	UpdateStatusMessage( " " );
+	SetStatusMessage( " " );
 	Step();
 }
 
 function RunButton()
 {
-	UpdateStatusMessage( "Running..." );
+	SetStatusMessage( "Running..." );
 	/* Make sure that the step interval is up-to-date */
 	SpeedCheckbox();
 	EnableControls( false, false, true, false, false, false );
@@ -521,7 +559,7 @@ function RunButton()
 function StopButton()
 {
 	if( hRunTimer != null ) {
-		UpdateStatusMessage( "Paused; click 'Run' or 'Step' to resume." );
+		SetStatusMessage( "Paused; click 'Run' or 'Step' to resume." );
 		EnableControls( true, true, false, true, true, true );
 		StopTimer();
 	}
@@ -529,7 +567,7 @@ function StopButton()
 
 function ResetButton()
 {
-	UpdateStatusMessage( "Machine reset." );
+	SetStatusMessage( "Machine reset." );
 	Reset( $.trim($("#InitialInput" )[0].value) );
 	EnableControls( true, true, false, true, true, true );
 }
@@ -539,7 +577,80 @@ function SpeedCheckbox()
   bFullSpeed = $( '#SpeedCheckbox' )[0].checked;
 }
 
-function LoadProgram( zName, bResetWhenLoaded )
+function LoadFromCloud( sID )
+{
+	/* Get data from github */
+	$.ajax({
+		url: "https://api.github.com/gists/" + sID,
+		type: "GET",
+		dataType: "json",
+		success: loadSuccessCallback,
+		error: loadErrorCallback
+	});
+}
+
+function loadSuccessCallback( oData )
+{
+	if( !oData || !oData.files || !oData.files["machine.json"] || !oData.files["machine.json"].content ) {
+		debug( 1, "Error: load request succeeded but can't find expected data!" );
+		SetStatusMessage( "Error loading saved machine." );
+		return;
+	}
+	var oUnpackedObject;
+	try {
+		oUnpackedObject = JSON.parse( oData.files["machine.json"].content );
+	} catch( e ) {
+		debug( 1, "Error: Exception when unpacking JSON: " + e );
+		SetStatusMessage( "Error loading saved machine." );
+		return;
+	}
+	SetMachineSnapshot( oUnpackedObject );
+}
+
+function loadErrorCallback( oData, sStatus, oRequestObj )
+{
+	debug( 1, "Error: load request failed!" );
+	SetStatusMessage( "Error loading saved machine." );
+}
+
+function SaveToCloud()
+{
+	var oUnpackedObject = GetMachineSnapshot();
+	var gistApiInput = {
+		"description": "Saved Turing machine state from http://morphett.info/turing/turing.html",
+		"public": false,
+		"files": {
+			"machine.json": {
+				"content": JSON.stringify( oUnpackedObject )
+			}
+		}
+	};
+	$.ajax({
+		url: "https://api.github.com/gists",
+		type: "POST",
+		data: JSON.stringify(gistApiInput),
+		dataType: "json", 
+		contentType: 'application/json; charset=utf-8',
+		success: saveSuccessCallback,
+		error: saveErrorCallback
+	});
+}
+
+function saveSuccessCallback( oData )
+{
+	if( oData && oData.id ) {
+		debug( 1, "Save successful. Gist ID is " + oData.id, " Gist URL is " + oData.url );
+		SetStatusMessage( "Successfully saved. Your URL is " + window.location.href.split("#")[0] + "#" + oData.id );
+	}
+}
+
+function saveErrorCallback( oData, sStatus, oRequestObj )
+{
+	debug( 1, "Error: save request failed!" );
+	SetStatusMessage( "Save failed :(" );
+}
+
+function LoadProgram( zName )
 {
 	debug( 1, "Load '" + zName + "'" );
 	var zFileName = "machines/" + zName + ".txt";
@@ -563,11 +674,8 @@ function LoadProgram( zName, bResetWhenLoaded )
 			TextareaChanged();
 			Compile();
 			
-			/* Reset the machine to load the new tape, etc, if required */
-			/* This is necessary only when loading the default program for the first time */
-			if( bResetWhenLoaded ) {
-				Reset( $('#InitialInput' )[0].value );
-			}
+			/* Reset the machine  */
+			Reset( $('#InitialInput')[0].value );
 		}
 	};
 	
@@ -665,9 +773,13 @@ function OnLoad()
 	oTextarea = $("#Source")[0];
 	TextareaChanged();
 	
-	LoadProgram( 'concatenate', true );
-	
-	UpdateStatusMessage( 'Load or write a Turing program below and click Run!' );
+	if( window.location.hash ) {
+		SetStatusMessage( "Loading saved machine..." );
+		LoadFromCloud( window.location.hash.substring( 1 ) );
+		window.location.hash = "";
+	} else {
+		LoadProgram( 'concatenate' );
+		SetStatusMessage( 'Load or write a Turing program below and click Run!' );
+	}
 }
-
 

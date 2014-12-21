@@ -13,7 +13,7 @@
   <div id="Header">
    <h1>Turing machine simulator</h1>
    <div class="backlinks">
-    [<a href="../default.html">Back to home page</a>]
+    [<a href="http://morphett.info/default.html">Back to home page</a>]
    </div>
    <div id="IntroText">
     This is a <a href="http://en.wikipedia.org/wiki/Turing_machine">Turing machine</a> simulator, written in JavaScript.
@@ -43,7 +43,7 @@
     </div>
     <div id="MachineTape" class="MachineStatusBox"><!-- the following pre elements must be on a single line with no whitespace between them !-->
      <div id="RunningTapeDisplay">
-      <pre id="LeftTape" class="tape"></pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"></pre><div id="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"></pre>
+      <pre id="LeftTape" class="tape"></pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"> </pre><div id="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"></pre>
      </div>
     </div> <!-- div MachineTape !-->
    </div>
@@ -54,13 +54,13 @@
     <div id="MachineStateContainer">
      Current state:
      <div id="MachineState" class="MachineStatusBox">
-      Machine state
+ - 
      </div> <!-- div MachineState !-->
     </div> <!-- div MachineStateContainer !-->
     <div id="MachineStepsContainer">
      Steps:
      <div id="MachineSteps" class="MachineStatusBox">
-      Machine steps
+ - 
      </div> <!-- div MachineSteps !-->
     </div> <!-- div MachineStepsContainer !-->
    </div> <!-- div MachineStatusLowerBlock !-->
@@ -76,9 +76,12 @@
      <button id="StopButton" onclick="StopButton();" disabled="true">Pause</button><br> <!-- &#x25fe; !-->
      <button id="ResetButton" onclick="ResetButton();">Reset</button><br> <!-- &#x2759;&#x23ea; !-->
      <div id="InitialTapeDisplay">
-      Initial input:<input type="text" id="InitialInput" value="abcde"/>
+      Initial input:<input type="text" id="InitialInput" value=""/>
      </div>
-     <!--<br><button id="DebugButton" onclick="x();" class="DebugClass">Debug</button><br>!-->
+     <br>
+     <br>
+     <button id="SaveButton" onclick="SaveToCloud();">Save to the cloud</button>
+     <!--<br><button id="DebugButton" onclick="x();">Debug</button><br>!-->
     </div> <!-- div MachineButtonsBlock !-->
 
     <div id="MachineProgramBlock">
@@ -99,7 +102,7 @@
       <select id="LoadSelector">
        <option value="concatenate">Concatenate strings</option>
        <option value="binaryadd">Binary addition</option>
-       <option value="binarymult2">Binary multiplication</option>
+       <option value="binarymult">Binary multiplication</option>
        <option value="bin2dec">Binary to decimal conversion</option>
        <option value="turingsequence">Turing's sequence machine</option>
        <option value="parentheses">Check parentheses</option>
@@ -109,7 +112,7 @@
        <option value="universal">Universal Turing machine</option>
        <!-- Corresponding program should be stored on the server in a file <value>.txt, eg concatenate.txt !-->
       </select>
-      <button id="LoadButton" onclick="LoadProgram( document.getElementById( 'LoadSelector' ).value, false );">Load</button>
+      <button id="LoadButton" onclick="LoadProgram( document.getElementById( 'LoadSelector' ).value );">Load</button>
      </div> <!-- div inputProg !-->
      <div class="clear"></div>
     </div> <!-- div MachineProgramBlock !-->
@@ -132,7 +135,7 @@
    </ul>
   </div>
   <div class="Signature">
-   -- <a href="../default.html">Anthony Morphett</a> - awmorp @ gmail.com
+   -- <a href="http://morphett.info/default.html">Anthony Morphett</a> - awmorp @ gmail.com
   </div>
   <div id="debugOuter" class="DebugClass">
    Debug: <button id="ClearDebugButton" onclick="ClearDebug();">clear</button>
