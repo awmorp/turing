@@ -37,86 +37,95 @@
    </div>
   </div>
   <div id="Machine">
-   <div>
-    <div>
-     Tape:
-    </div>
-    <div id="MachineTape" class="MachineStatusBox"><!-- the following pre elements must be on a single line with no whitespace between them !-->
-     <div id="RunningTapeDisplay">
-      <pre id="LeftTape" class="tape"></pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"> </pre><div id="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"></pre>
-     </div>
-    </div> <!-- div MachineTape !-->
-   </div>
-   <div id="MachineStatusLowerBlock">
+   <div class="BoxTitle">Tape</div>
+   <div id="MachineTape" class="MachineStatusBox" title="This is the Turing machine's tape. The head position is indicated by the highlighted cell and arrow.">
+    <!-- the following pre elements must be on a single line with no whitespace between them !-->
+    <div id="RunningTapeDisplay"><pre id="LeftTape" class="tape"></pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"> </pre><div id="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"></pre></div>
+   </div> <!-- div MachineTape !-->
+
+   <div id="MachineMiddleSection">
     <pre id="MachineStatusMessagesContainer">
     Choose a program and click Run!
     </pre> <!-- div MachineStatusMessagesContainer !-->
-    <div id="MachineStateContainer">
-     Current state:
+
+    <div id="MachineStateContainer" class="MachineStatusContainer" title="This is the Turing machine's current state">
+     <div class="BoxTitle">Current state</div>
      <div id="MachineState" class="MachineStatusBox">
  - 
      </div> <!-- div MachineState !-->
     </div> <!-- div MachineStateContainer !-->
-    <div id="MachineStepsContainer">
-     Steps:
+
+    <div id="MachineStepsContainer" class="MachineStatusContainer" title="This is the number of steps executed by the machine since starting">
+     <div class="BoxTitle">Steps</div>
      <div id="MachineSteps" class="MachineStatusBox">
  - 
      </div> <!-- div MachineSteps !-->
     </div> <!-- div MachineStepsContainer !-->
-   </div> <!-- div MachineStatusLowerBlock !-->
+   </div> <!-- div MachineMiddleSection !-->
+   <br clear="all">
 
-   <div id="MachineControlBlock">
+   <div id="MachineLowerSection">
 
-    <div id="MachineButtonsBlock">
-     <br>
-     Controls:<br>
-     <button id="StepButton" onclick="StepButton();">Step</button><br> <!-- &#x25b8;&#x2759; !-->
-     <button id="RunButton" onclick="RunButton();">Run</button> <!-- &#x25b8; !-->
-     <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();"/><span id="SpeedCheckboxLabel">Run at full speed</span><br>
-     <button id="StopButton" onclick="StopButton();" disabled="true">Pause</button><br> <!-- &#x25fe; !-->
-     <button id="ResetButton" onclick="ResetButton();">Reset</button><br> <!-- &#x2759;&#x23ea; !-->
-     <div id="InitialTapeDisplay">
-      Initial input:<input type="text" id="InitialInput" value=""/>
-     </div>
-     <br>
-     <br>
-     <button id="SaveButton" onclick="SaveToCloud();">Save to the cloud</button>
-     <!--<br><button id="DebugButton" onclick="x();">Debug</button><br>!-->
-    </div> <!-- div MachineButtonsBlock !-->
-
-    <div id="MachineProgramBlock">
-     Turing machine program:<br>
-     <div id="SourceContainer">
-      <div id="SourceBackground">
+    <div id="MachineControlBlock">
+     <div id="MachineButtonsBlock">
+      Controls:<br>
+      <button id="StepButton" onclick="StepButton();">Step</button><br> <!-- &#x25b8;&#x2759; !-->
+      <button id="RunButton" onclick="RunButton();">Run</button> <!-- &#x25b8; !-->
+      <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();"/><span id="SpeedCheckboxLabel">Run at full speed</span><br>
+      <button id="StopButton" onclick="StopButton();" disabled="true">Pause</button><br> <!-- &#x25fe; !-->
+      <button id="ResetButton" onclick="ResetButton();">Reset</button><br> <!-- &#x2759;&#x23ea; !-->
+      <div id="InitialTapeDisplay">
+       Initial input:<input type="text" id="InitialInput" value=""/>
       </div>
-      <div id="tabackground">
+      <br>
+      <br>
+      <button id="SaveButton" onclick="SaveToCloud();">Save to the cloud</button>
+      <div id="SaveStatus"></div>
+      <!--<br><button id="DebugButton" onclick="x();">Debug</button><br>!-->
+     </div> <!-- div MachineButtonsBlock !-->
+    </div> <!-- div MachineControlBlock !-->
+
+
+    <div id="MachineProgramContainer">
+     <div id="MachineProgramBlock" title="This is the Turing machine's program. See documentation below for syntax.">
+      <div id="MachineProgramBlock2">
+       Turing machine program:<br>
+       <div id="SourceContainer">
+        <div id="SourceBackground">
+        </div>
+        <div id="tabackground">
 <!-- no indenting, because text inside textarea is verbatim !-->
 <textarea id="Source" wrap="off" oninput="TextareaChanged();" onscroll="UpdateTextareaScroll();" onblur="Compile();">
 ; Load a program from the menu below or write your own!
 </textarea>
-      </div>
-     </div> 
-     <div id="SyntaxMsg"></div>
-	 <div id="LoadBlock">
-      Example programs:
-      <select id="LoadSelector">
-       <option value="concatenate">Concatenate strings</option>
-       <option value="binaryadd">Binary addition</option>
-       <option value="binarymult">Binary multiplication</option>
-       <option value="bin2dec">Binary to decimal conversion</option>
-       <option value="turingsequence">Turing's sequence machine</option>
-       <option value="parentheses">Check parentheses</option>
-       <option value="reversepolishboolean">Reverse polish boolean calculator</option>
-       <option value="primetest">Primality test</option>
-       <option value="4statebeaver">4-state busy beaver</option>
-       <option value="universal">Universal Turing machine</option>
-       <!-- Corresponding program should be stored on the server in a file <value>.txt, eg concatenate.txt !-->
-      </select>
-      <button id="LoadButton" onclick="LoadProgram( document.getElementById( 'LoadSelector' ).value );">Load</button>
-     </div> <!-- div inputProg !-->
-     <div class="clear"></div>
-    </div> <!-- div MachineProgramBlock !-->
-   </div> <!-- div MachineControlBlock !-->
+        </div>
+       </div>
+       <div id="SyntaxMsg"></div>
+   	  <div id="LoadBlock">
+        Example programs:
+        <select id="LoadSelector">
+         <option value="concatenate">Concatenate strings</option>
+         <option value="binaryadd">Binary addition</option>
+         <option value="binarymult">Binary multiplication</option>
+         <option value="bin2dec">Binary to decimal conversion</option>
+         <option value="turingsequence">Turing's sequence machine</option>
+         <option value="parentheses">Check parentheses</option>
+         <option value="reversepolishboolean">Reverse polish boolean calculator</option>
+         <option value="primetest">Primality test</option>
+         <option value="4statebeaver">4-state busy beaver</option>
+         <option value="universal">Universal Turing machine</option>
+         <!-- Corresponding program should be stored on the server in a file <value>.txt, eg concatenate.txt !-->
+        </select>
+        <button id="LoadButton" onclick="LoadProgram( document.getElementById( 'LoadSelector' ).value );">Load</button>
+       </div> <!-- div inputProg !-->
+       <div class="clear"></div>
+      </div> <!-- div MachineProgramBlock2 !-->
+     </div> <!-- div MachineProgramBlock !-->
+    </div> <!-- div MachineProgramContainer !--> 
+   
+   <br clear="all">
+   </div> <!-- div MachineLowerSection !-->
+
   </div> <!-- div Machine !-->
   <div id="SyntaxInfo">Syntax:
    <ul>

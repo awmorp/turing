@@ -4,10 +4,28 @@ body {
   text-align: center;
 }
 
+.BoxTitle {
+  position: relative;
+  top : 12px;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  height: 15px;
+  display: inline; 
+  background-color: #eeeeee;
+  background: solid;
+  border: 1px solid grey;
+  font-family: sans-serif;
+//  font-variant: small-caps;
+  font-size: small;
+  z-index: 3;
+}
+
 #Machine {
   border: 1px dashed red;
   background-color: #dfdfda;
-  padding-top: 0.25em;
+  padding-top: 0.5em;
   padding-bottom: 0.25em;
   padding-left: 0.25em;
   padding-right: 0.25em;
@@ -20,28 +38,17 @@ body {
   text-align: center;
 }
 
-.MachineStatusBox {
-  border: 1px solid grey;
-  padding-top: 0.25em;
-  padding-bottom: 0.25em;
-  padding-left: 0.25em;
-  padding-right: 0.25em;
-  margin-top: 5px;
-  margin-bottom: 8px;
-/*  text-align: center; */
-  font-family: "Courier New", courier;
-}
 
 #MachineTape {
   background-color: #eee8aa;
-  height: 2em;
+  height: 50px;
   margin-left: 5%;
   margin-right: 5%;
-  width: 90%;
+  padding-top: 10px;
   font-size: x-large;
-  margin-bottom: 2em;
-  overflow: auto;
+  margin-bottom: 1em;
 }
+
 
 .tape {
   display: inline;
@@ -73,29 +80,49 @@ body {
 }
 
 #RunningTapeDisplay {
+  overflow: auto;
+//  position: relative;
+//  top: -14px;
+  height: 2.5em;
 }
 
 #InitialTapeDisplay {
-  visibility: none;
 }
 
-#MachineStateContainer {
-  text-align: left;
+.MachineStatusContainer {
+  text-align: center;
   width: 100px;
-  float: left;
   position: relative;
   top: -1em;
+  margin: 0;
+  padding: 0;
 }
 
-#MachineState {
+.MachineStatusBox {
+  border: 1px solid grey;
+  padding-top: 12px;
+  padding-bottom: 0.25em;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  margin-top: 5px;
+  margin-bottom: 8px;
+  margin-left: 0;
+  margin-right: 0;
+/*  text-align: center; */
+  font-family: "Courier New", courier;
   background-color: #90ee90;
-  text-align: center;
-  display: block;
-  width: 100%;
+}
+
+
+#MachineStateContainer {
   float: left;
 }
 
-#MachineStatusLowerBlock {
+#MachineStepsContainer {
+  float: right;
+}
+
+#MachineMiddleSection {
   text-align: center;
   height: 4em;
   position: relative;
@@ -108,46 +135,48 @@ body {
   height: 3em;
   display: inline;
   position: relative;
-/*  bottom: -2em; */
   font-size: larger;
 }
 
-#MachineStepsContainer {
-  text-align: left;
-  float: right;
-  width: 100px;
+#MachineLowerSection {
   position: relative;
-  top: -1em;
 }
 
-#MachineSteps {
-  background-color: #90ee90;
-  text-align: center;
-  float: right;
-  display: block;
-  width: 100%;
-  float: right;
-}
 
 #MachineControlBlock {
+  width: 300px;
+  float: right;
+  border: 1px solid orange;
+}
+
+#MachineProgramContainer {
+  border: 1px solid blue;
+  text-align: left;
+  width: 100%;
 }
 
 #MachineProgramBlock {
-  padding-left: 50px;
-  padding-right: 250px;
+/*  padding-left: 50px;
+  padding-right: 250px;*/
   text-align: center;
 /*  max-width: 75%;*/
   overflow: hidden;
-/*  border: 1px solid red; */
+  border: 1px solid red;
+}
+
+#MachineProgramBlock2 {
+  border: 1px solid grey;
+  padding: 4px;
+  display: inline-block;
 }
 
 #MachineButtonsBlock {
-  width: 200px;
-  float: right;
+/*  width: 200px; */
+/*  float: right; */
   text-align: left;
   margin-left: 50px;
+  border: 1px solid green;
 }
-
 
 #LoadBlock {
 	padding-left: 40px;

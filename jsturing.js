@@ -639,15 +639,26 @@ function SaveToCloud()
 function saveSuccessCallback( oData )
 {
 	if( oData && oData.id ) {
-		debug( 1, "Save successful. Gist ID is " + oData.id, " Gist URL is " + oData.url );
-		SetStatusMessage( "Successfully saved. Your URL is " + window.location.href.split("#")[0] + "#" + oData.id );
+		var sURL = window.location.href.split("#")[0] + "#" + oData.id;
+		debug( 1, "Save successful. Gist ID is " + oData.id, " Gist URL is " + oData.url + ", user URL is " + sURL );
+		
+		var oNow = new Date();
+		
+		var sTimestamp = oNow.getHours() + ":" + oNow.getMinutes() + ":" + oNow.getSeconds() + " " + oNow.toLocaleDateString();
+		
+		SetSaveMessage( "Last saved at " + sTimestamp + " to <a href=" + sURL + ">" + sURL + "</a>", true);
 	}
 }
 
 function saveErrorCallback( oData, sStatus, oRequestObj )
 {
 	debug( 1, "Error: save request failed!" );
-	SetStatusMessage( "Save failed :(" );
+	SetSaveMessage( "Save failed :(", false );
+}
+
+function SetSaveMessage( sStr, bOK )
+{
+	$("#SaveStatus").html( sStr );
 }
 
 function LoadProgram( zName )
@@ -765,7 +776,7 @@ function UpdateTextareaScroll()
 	$(oBackgroundDiv).css( {'margin-top': (-1*$(oTextarea).scrollTop()) + "px"} );
 }
 
-/* Initialise once page is loaded */
+/* OnLoad function for HTML body.  Initialise things when page is loaded. */
 function OnLoad()
 {
 	if( nDebugLevel > 0 ) $(".DebugClass").toggle( true );
