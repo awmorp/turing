@@ -2,6 +2,8 @@
 
 body {
   text-align: center;
+  
+  font-family: sans-serif;
 }
 
 .BoxTitle {
@@ -24,7 +26,8 @@ body {
 
 #Machine {
   border: 1px dashed red;
-  background-color: #dfdfda;
+/*  background-color: #dfdfda;*/
+  background-color: #ffe1e1;
   padding-top: 0.5em;
   padding-bottom: 0.25em;
   padding-left: 0.25em;
@@ -81,12 +84,11 @@ body {
 
 #RunningTapeDisplay {
   overflow: auto;
-//  position: relative;
-//  top: -14px;
   height: 2.5em;
 }
 
 #InitialTapeDisplay {
+  display: inline;
 }
 
 .MachineStatusContainer {
@@ -110,7 +112,7 @@ body {
   margin-right: 0;
 /*  text-align: center; */
   font-family: "Courier New", courier;
-  background-color: #90ee90;
+  background-color: #C9F2C9;
 }
 
 
@@ -146,40 +148,42 @@ body {
 #MachineControlBlock {
   width: 300px;
   float: right;
-  border: 1px solid orange;
 }
 
 #MachineProgramContainer {
-  border: 1px solid blue;
-  text-align: left;
+  text-align: center;
   width: 100%;
+  position: relative;
+//  top: -2em;
 }
 
 #MachineProgramBlock {
-/*  padding-left: 50px;
-  padding-right: 250px;*/
+  padding-top: 8px;
   text-align: center;
-/*  max-width: 75%;*/
   overflow: hidden;
-  border: 1px solid red;
 }
 
 #MachineProgramBlock2 {
-  border: 1px solid grey;
   padding: 4px;
   display: inline-block;
 }
 
 #MachineButtonsBlock {
-/*  width: 200px; */
-/*  float: right; */
+  height: 100%;
   text-align: left;
-  margin-left: 50px;
-  border: 1px solid green;
+  margin-left: 10px;
+  border: 1px solid grey;
+  padding: 4px;
+  margin-top: 4px;
+  padding-top: 12px;
+  background: #dedede;
 }
 
 #LoadBlock {
-	padding-left: 40px;
+}
+
+button {
+  min-width: 75px;
 }
 
 #MachineHead {
@@ -281,4 +285,9 @@ ul {
 
 .disabled {
   color: grey;
+}
+
+.cleardiv {
+  clear: both;
+  height: 0px;
 }

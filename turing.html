@@ -62,47 +62,25 @@
      </div> <!-- div MachineSteps !-->
     </div> <!-- div MachineStepsContainer !-->
    </div> <!-- div MachineMiddleSection !-->
-   <br clear="all">
+   <div class="cleardiv"></div>
 
    <div id="MachineLowerSection">
 
     <div id="MachineControlBlock">
+     <div class="BoxTitle">Controls</div>
      <div id="MachineButtonsBlock">
-      Controls:<br>
-      <button id="StepButton" onclick="StepButton();">Step</button><br> <!-- &#x25b8;&#x2759; !-->
       <button id="RunButton" onclick="RunButton();">Run</button> <!-- &#x25b8; !-->
       <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();"/><span id="SpeedCheckboxLabel">Run at full speed</span><br>
       <button id="StopButton" onclick="StopButton();" disabled="true">Pause</button><br> <!-- &#x25fe; !-->
+      <button id="StepButton" onclick="StepButton();">Step</button><br> <!-- &#x25b8;&#x2759; !-->
       <button id="ResetButton" onclick="ResetButton();">Reset</button><br> <!-- &#x2759;&#x23ea; !-->
       <div id="InitialTapeDisplay">
        Initial input:<input type="text" id="InitialInput" value=""/>
       </div>
       <br>
       <br>
-      <button id="SaveButton" onclick="SaveToCloud();">Save to the cloud</button>
-      <div id="SaveStatus"></div>
-      <!--<br><button id="DebugButton" onclick="x();">Debug</button><br>!-->
-     </div> <!-- div MachineButtonsBlock !-->
-    </div> <!-- div MachineControlBlock !-->
-
-
-    <div id="MachineProgramContainer">
-     <div id="MachineProgramBlock" title="This is the Turing machine's program. See documentation below for syntax.">
-      <div id="MachineProgramBlock2">
-       Turing machine program:<br>
-       <div id="SourceContainer">
-        <div id="SourceBackground">
-        </div>
-        <div id="tabackground">
-<!-- no indenting, because text inside textarea is verbatim !-->
-<textarea id="Source" wrap="off" oninput="TextareaChanged();" onscroll="UpdateTextareaScroll();" onblur="Compile();">
-; Load a program from the menu below or write your own!
-</textarea>
-        </div>
-       </div>
-       <div id="SyntaxMsg"></div>
-   	  <div id="LoadBlock">
-        Example programs:
+         	  <div id="LoadBlock">
+        Load an example program:
         <select id="LoadSelector">
          <option value="concatenate">Concatenate strings</option>
          <option value="binaryadd">Binary addition</option>
@@ -118,14 +96,34 @@
         </select>
         <button id="LoadButton" onclick="LoadProgram( document.getElementById( 'LoadSelector' ).value );">Load</button>
        </div> <!-- div inputProg !-->
-       <div class="clear"></div>
+
+      <button id="SaveButton" onclick="SaveToCloud();">Save to the cloud</button>
+      <div id="SaveStatus"></div>
+      <!--<br><button id="DebugButton" onclick="x();">Debug</button><br>!-->
+     </div> <!-- div MachineButtonsBlock !-->
+    </div> <!-- div MachineControlBlock !-->
+
+    <div id="MachineProgramContainer">
+     <div class="BoxTitle">Turing machine program</div>
+     <div id="MachineProgramBlock" title="This is the Turing machine's program. See documentation below for syntax.">
+      <div id="MachineProgramBlock2">
+       <div id="SourceContainer">
+        <div id="SourceBackground">
+        </div>
+        <div id="tabackground">
+<!-- no indenting, because text inside textarea is verbatim !-->
+<textarea id="Source" wrap="off" oninput="TextareaChanged();" onscroll="UpdateTextareaScroll();" onblur="Compile();">
+; Load a program from the menu below or write your own!
+</textarea>
+        </div>
+       </div>
+       <div id="SyntaxMsg"></div>
       </div> <!-- div MachineProgramBlock2 !-->
      </div> <!-- div MachineProgramBlock !-->
     </div> <!-- div MachineProgramContainer !--> 
-   
-   <br clear="all">
    </div> <!-- div MachineLowerSection !-->
 
+   <div class="cleardiv"></div>
   </div> <!-- div Machine !-->
   <div id="SyntaxInfo">Syntax:
    <ul>
