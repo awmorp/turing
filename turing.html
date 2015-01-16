@@ -15,15 +15,15 @@
    <div class="backlinks">
     [<a href="http://morphett.info/default.html">Back to home page</a>]
    </div>
-   <div id="IntroText">
-    This is a <a href="http://en.wikipedia.org/wiki/Turing_machine">Turing machine</a> simulator, written in JavaScript.
+   <div id="IntroText" class="collabsible">
+    This is a <a href="http://en.wikipedia.org/wiki/Turing_machine">Turing machine</a> simulator.
     To use it:<br>
     <ol>
      <li>
-      Load one of the example programs, or write your own in the Turing machine program area below.
+      Load one of the example programs, or write your own in the Turing machine program area.  See below for syntax.
      </li>
      <li>
-      Enter something in the 'Initial input' area - this will be written on the tape initially as input to the machine. Click 'Reset' to initialise the machine.
+      Enter something in the 'Input' area - this will be written on the tape initially as input to the machine. Click 'Reset' to initialise the machine.
      </li>
      <li>
       Click on 'Run' to start the Turing machine and run it until it halts (if ever).
@@ -45,7 +45,6 @@
 
    <div id="MachineMiddleSection">
     <pre id="MachineStatusMessagesContainer">
-    Choose a program and click Run!
     </pre> <!-- div MachineStatusMessagesContainer !-->
 
     <div id="MachineStateContainer" class="MachineStatusContainer" title="This is the Turing machine's current state">
@@ -65,81 +64,106 @@
    <div class="cleardiv"></div>
 
    <div id="MachineLowerSection">
+    <div id="MachineLowerSection2">
 
-    <div id="MachineControlBlock">
-     <div class="BoxTitle">Controls</div>
-     <div id="MachineButtonsBlock">
-      <button id="RunButton" onclick="RunButton();">Run</button> <!-- &#x25b8; !-->
-      <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();"/><span id="SpeedCheckboxLabel">Run at full speed</span><br>
-      <button id="StopButton" onclick="StopButton();" disabled="true">Pause</button><br> <!-- &#x25fe; !-->
-      <button id="StepButton" onclick="StepButton();">Step</button><br> <!-- &#x25b8;&#x2759; !-->
-      <button id="ResetButton" onclick="ResetButton();">Reset</button><br> <!-- &#x2759;&#x23ea; !-->
-      <div id="InitialTapeDisplay">
-       Initial input:<input type="text" id="InitialInput" value=""/>
-      </div>
-      <br>
-      <br>
-         	  <div id="LoadBlock">
-        Load an example program:
-        <select id="LoadSelector">
-         <option value="concatenate">Concatenate strings</option>
-         <option value="binaryadd">Binary addition</option>
-         <option value="binarymult">Binary multiplication</option>
-         <option value="bin2dec">Binary to decimal conversion</option>
-         <option value="turingsequence">Turing's sequence machine</option>
-         <option value="parentheses">Check parentheses</option>
-         <option value="reversepolishboolean">Reverse polish boolean calculator</option>
-         <option value="primetest">Primality test</option>
-         <option value="4statebeaver">4-state busy beaver</option>
-         <option value="universal">Universal Turing machine</option>
-         <!-- Corresponding program should be stored on the server in a file <value>.txt, eg concatenate.txt !-->
-        </select>
-        <button id="LoadButton" onclick="LoadProgram( document.getElementById( 'LoadSelector' ).value );">Load</button>
-       </div> <!-- div inputProg !-->
-
-      <button id="SaveButton" onclick="SaveToCloud();">Save to the cloud</button>
-      <div id="SaveStatus"></div>
-      <!--<br><button id="DebugButton" onclick="x();">Debug</button><br>!-->
-     </div> <!-- div MachineButtonsBlock !-->
-    </div> <!-- div MachineControlBlock !-->
-
-    <div id="MachineProgramContainer">
-     <div class="BoxTitle">Turing machine program</div>
-     <div id="MachineProgramBlock" title="This is the Turing machine's program. See documentation below for syntax.">
-      <div id="MachineProgramBlock2">
-       <div id="SourceContainer">
-        <div id="SourceBackground">
-        </div>
-        <div id="tabackground">
+     <div id="MachineProgramContainer">
+      <div class="BoxTitle">Turing machine program</div>
+      <div id="MachineProgramBlock">
+       <div id="MachineProgramBlock2">
+        <div id="SourceContainer">
+         <div id="SourceBackground">
+         </div>
+         <div id="tabackground">
 <!-- no indenting, because text inside textarea is verbatim !-->
-<textarea id="Source" wrap="off" oninput="TextareaChanged();" onscroll="UpdateTextareaScroll();" onblur="Compile();">
-; Load a program from the menu below or write your own!
+<textarea id="Source" wrap="off" oninput="TextareaChanged();" onscroll="UpdateTextareaScroll();" onblur="Compile();" title="This is the Turing machine's program. See documentation below for syntax.">
+; Load a program from the menu or write your own!
 </textarea>
+         </div>
         </div>
+        <div id="SyntaxMsg"></div>
+       </div> <!-- div MachineProgramBlock2 !-->
+      </div> <!-- div MachineProgramBlock !-->
+     </div> <!-- div MachineProgramContainer !--> 
+
+     <div id="MachineControlBlock">
+      <div class="BoxTitle">Controls</div>
+      <div id="MachineButtonsBlock">
+       <button id="RunButton" onclick="RunButton();" title="Start the machine running">Run</button> <!-- &#x25b8; !-->
+       <span title="If enabled, runs as fast as your browser &amp; computer allow">
+        <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();"/>Run at full speed
+       </span>
+       <br>
+       <button id="StopButton" onclick="StopButton();" disabled="true" title="Pause the machine when running">Pause</button><br> <!-- &#x25fe; !-->
+       <button id="StepButton" onclick="StepButton();" title="Run the machine for a single step and the pause">Step</button><br> <!-- &#x25b8;&#x2759; !-->
+       <button id="ResetButton" onclick="ResetButton();" title="Reset the machine and tape to the initial state">Reset</button> <!-- &#x2759;&#x23ea; !-->
+       <span id="InitialTapeDisplay"  title="This initial data will be loaded on the tape when the machine starts">
+        Input:<input type="text" id="InitialInput" value=""/>
+       </span>
+       <br>
+       <br>
+       <br>
+       <div id="LoadBlock">
+        <a href="javascript:" onclick="$('#LoadMenu').slideToggle();">Load an example program</a>
+        <div id="LoadMenu">
+         <ul>
+          <li><a href="javascript:" onclick="LoadSampleProgram('concatenate', 'Concatenate strings machine');">Concatenate strings</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('binaryadd', 'Binary addition machine');">Binary addition</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('binarymult', 'Binary multiplication machine');">Binary multiplication</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('bin2dec', 'Binary to decimal conversion machine');">Binary to decimal conversion</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('turingsequence', 'Turing\'s sequence machine');">Turing's sequence machine</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('parentheses', 'Parentheses checker machine');">Parentheses checker</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('reversepolishboolean', 'Reverse polish boolean calculator');">Reverse polish boolean calculator</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('primetest', 'Primality test machine');">Primality test</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('4statebeaver', '4-state busy beaver');">4-state busy beaver</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('universal', 'Universal Turing machine');">Universal Turing machine</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('error', 'Error machine');">Error</a></li>
+         </ul>
+         <span style="font-size: x-small;"><a href="javascript:" onclick="$('#LoadMenu').hide();">[Close]</a></span>
+        </div>
+       </div> <!-- div inputProg !-->
+       <br>
+       <a href="javascript:" onclick="x(true);">Save to the cloud</a>...<a href="javascript:" onclick="x(false);">not</a>...<a href="javascript:" onclick="SaveToCloud();">no rly</a>
+       <div id="SaveStatus">
+        <div id="SaveStatusFg">
+         <div id="SaveStatusMsg"></div>
+         <span style="font-size: x-small;"><a href="javascript:" onclick="ClearSaveMessage();">[Close]</a></span>
+        </div> 
+        <div id="SaveStatusBg"></div>
        </div>
-       <div id="SyntaxMsg"></div>
-      </div> <!-- div MachineProgramBlock2 !-->
-     </div> <!-- div MachineProgramBlock !-->
-    </div> <!-- div MachineProgramContainer !--> 
+       <!--<br><button id="DebugButton" onclick="x();">Debug</button><br>!-->
+      </div> <!-- div MachineButtonsBlock !-->
+     </div> <!-- div MachineControlBlock !-->
+
+
+    </div> <!-- div MachineLowerSection2 !-->
    </div> <!-- div MachineLowerSection !-->
 
-   <div class="cleardiv"></div>
   </div> <!-- div Machine !-->
-  <div id="SyntaxInfo">Syntax:
+  <div id="SyntaxInfo" class="collabsible">Syntax:
    <ul>
-    <li>Each line should contain one tuple of the form '<tt>&lt;current state&gt; &lt;current symbol&gt; &lt;new symbol&gt; &lt;direction&gt; &lt;new state&gt;</tt>'.</li>
-    <li>You can use any number or word for <tt>&lt;current state&gt;</tt> and <tt>&lt;new state&gt;</tt>, eg <tt>0, a, state1</tt>. State labels are case-sensitive.</li>
-    <li><tt>halt</tt> is the halting state. The machine starts in state <tt>0</tt>.</li>
-    <li>You can use any character for <tt>&lt;current symbol&gt;</tt> and <tt>&lt;new symbol&gt;</tt>, or '<tt>_</tt>' to represent blank (space). Symbols are case-sensitive.</li>
-    <li><tt>&lt;direction&gt;</tt> should be '<tt>l</tt>', '<tt>r</tt>' or '<tt>*</tt>', denoting 'move left', 'move right' or 'do not move', respectively.</li>
-    <li>Anything after a '<tt>;</tt>' is a comment and is ignored.</li>
+    <li>Each line should contain one tuple of the form '<code>&lt;current state&gt; &lt;current symbol&gt; &lt;new symbol&gt; &lt;direction&gt; &lt;new state&gt;</code>'.</li>
+    <li>You can use any number or word for <code>&lt;current state&gt;</code> and <code>&lt;new state&gt;</code>, eg <code>0, a, state1</code>. State labels are case-sensitive.</li>
+    <li><code>halt</code> is the halting state. The machine starts in state <code>0</code>.</li>
+    <li>You can use any character for <code>&lt;current symbol&gt;</code> and <code>&lt;new symbol&gt;</code>, or '<code>_</code>' to represent blank (space). Symbols are case-sensitive.</li>
+    <li><code>&lt;direction&gt;</code> should be '<code>l</code>', '<code>r</code>' or '<code>*</code>', denoting 'move left', 'move right' or 'do not move', respectively.</li>
+    <li>Anything after a '<code>;</code>' is a comment and is ignored.</li>
    </ul>
    Also:
    <ul>
-    <li>'<tt>*</tt>' can be used in <tt>&lt;current symbol&gt;</tt> or <tt>&lt;current state&gt;</tt> to match any character or state.</li>
-    <li>'<tt>*</tt>' can be used in <tt>&lt;new symbol&gt;</tt> or <tt>&lt;new state&gt;</tt> to mean 'no change'.</li>
-    <li>'<tt>!</tt>' can be used at the end of a line to set a breakpoint, eg '<tt>1 a b r 2 !</tt>'. The machine will automatically pause after executing this line.</li>
+    <li>'<code>*</code>' can be used in <code>&lt;current symbol&gt;</code> or <code>&lt;current state&gt;</code> to match any character or state.</li>
+    <li>'<code>*</code>' can be used in <code>&lt;new symbol&gt;</code> or <code>&lt;new state&gt;</code> to mean 'no change'.</li>
+    <li>'<code>!</code>' can be used at the end of a line to set a breakpoint, eg '<code>1 a b r 2 !</code>'. The machine will automatically pause after executing this line.</li>
    </ul>
+  </div>
+  <div id="MetaInfo" class="collabsible">
+   <div>
+    Technical details: The Turing machine simulator is written in HTML/Javascript.  Saved machines are stored as anonymous GISTs on <a href="https://gist.github.com/">GitHub's GIST</a> service.  Source code for this simulator is <a href="https://github.com/awmorp/jsturing">available on GitHub</a>.  You are welcome to download, fork, copy, or modify the code.
+   </div>
+   <br>
+   <div>
+    Mailing list: <a href="http://www.freelists.org/list/jsturing">Subscribe to the mailing list</a> for occasional updates and news about the Turing machine simulator (typically 1-2 emails per year).
+   </div>
+   
   </div>
   <div class="Signature">
    -- <a href="http://morphett.info/default.html">Anthony Morphett</a> - awmorp @ gmail.com

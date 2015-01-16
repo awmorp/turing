@@ -4,6 +4,13 @@
 /* Version 2.0 - December 2014 */
 /* Uses jquery (1.11.1) */
 
+/* TODO:
+     - properly handle long tape
+     - better default example program - palindrome checker?
+     - factorial program?
+
+*/
+
 
 var nDebugLevel = 1;
 
@@ -77,8 +84,8 @@ function Step()
 	} else {
 		/* No matching rule found; halt */
 		debug( 1, "Warning: no instruction found for state '" + sState + "' symbol '" + sHeadSymbol + "'; halting" );
-		SetStatusMessage( "No rule for state '" + sState + "', symbol '" + sHeadSymbol + "'. Halted." );
-		sNewState = "halt-error";
+		SetStatusMessage( "Halted. No rule for state '" + sState + "' and symbol '" + sHeadSymbol + "'." );
+		sNewState = "halt";
 		sNewSymbol = sHeadSymbol;
 		nAction = 0;
 		nLineNumber = -1;
@@ -170,6 +177,7 @@ function Reset( sInitialTape )
 	oPrevInstruction = null;
 	oNextInstruction = FindNextInstruction( sState, GetTapeSymbol( nHeadPosition - nTapeOffset ) );
 	
+	EnableControls( true, true, false, true, true, true );
 	UpdateInterface();
 }
 
@@ -201,8 +209,8 @@ function GetMachineSnapshot()
 	});
 }
 
-/* SetMachineState(): Load a machine and state from an object created by GetMachineSnapshot */
-function SetMachineSnapshot( oObj )
+/* LoadMachineState(): Load a machine and state from an object created by GetMachineSnapshot */
+function LoadMachineSnapshot( oObj )
 {
 	if( oObj.program ) oTextarea.value = oObj.program;
 	if( oObj.state ) sState = oObj.state;
@@ -216,7 +224,7 @@ function SetMachineSnapshot( oObj )
 		bFullSpeed = oObj.fullspeed;
 	}
 	if( sState.substring(0,4).toLowerCase() == "halt" ) {
-		SetStatusMessage( "Halted." );
+		SetStatusMessage( "Machine loaded. Halted." );
 		EnableControls( false, false, false, true, true, true );
 	} else {
 		SetStatusMessage( "Machine loaded and ready" );
@@ -567,7 +575,7 @@ function StopButton()
 
 function ResetButton()
 {
-	SetStatusMessage( "Machine reset." );
+	SetStatusMessage( "Machine reset. Click 'Run' or 'Step' to start." );
 	Reset( $.trim($("#InitialInput" )[0].value) );
 	EnableControls( true, true, false, true, true, true );
 }
@@ -592,8 +600,8 @@ function LoadFromCloud( sID )
 function loadSuccessCallback( oData )
 {
 	if( !oData || !oData.files || !oData.files["machine.json"] || !oData.files["machine.json"].content ) {
-		debug( 1, "Error: load request succeeded but can't find expected data!" );
-		SetStatusMessage( "Error loading saved machine." );
+		debug( 1, "Error: Load AJAX request succeeded but can't find expected data." );
+		SetStatusMessage( "Error loading saved machine :(" );
 		return;
 	}
 	var oUnpackedObject;
@@ -601,16 +609,16 @@ function loadSuccessCallback( oData )
 		oUnpackedObject = JSON.parse( oData.files["machine.json"].content );
 	} catch( e ) {
 		debug( 1, "Error: Exception when unpacking JSON: " + e );
-		SetStatusMessage( "Error loading saved machine." );
+		SetStatusMessage( "Error loading saved machine :(" );
 		return;
 	}
-	SetMachineSnapshot( oUnpackedObject );
+	LoadMachineSnapshot( oUnpackedObject );
 }
 
 function loadErrorCallback( oData, sStatus, oRequestObj )
 {
-	debug( 1, "Error: load request failed!" );
-	SetStatusMessage( "Error loading saved machine." );
+	debug( 1, "Error: Load failed. AJAX request to Github failed. HTTP response " + oRequestObj );
+	SetStatusMessage( "Error loading saved machine :(" );
 }
 
 function SaveToCloud()
@@ -639,44 +647,61 @@ function SaveToCloud()
 function saveSuccessCallback( oData )
 {
 	if( oData && oData.id ) {
-		var sURL = window.location.href.split("#")[0] + "#" + oData.id;
-		debug( 1, "Save successful. Gist ID is " + oData.id, " Gist URL is " + oData.url + ", user URL is " + sURL );
+		var sURL = window.location.href.replace(/\?.*/,"")		/* Strip off any query parameters, ie "?12345678" */
+		sURL += "?" + oData.id;									/* Append gist id as query string */
+		//var sURL = "http://morphett.info/turing/turing.html" + "?" + oData.id;
+		debug( 1, "Save successful. Gist ID is " + oData.id + " Gist URL is " + oData.url /*+ ", user URL is " + sURL */ );
 		
 		var oNow = new Date();
 		
-		var sTimestamp = oNow.getHours() + ":" + oNow.getMinutes() + ":" + oNow.getSeconds() + " " + oNow.toLocaleDateString();
+		var sTimestamp = (oNow.getHours() < 10 ? "0" + oNow.getHours() : oNow.getHours()) + ":" + (oNow.getMinutes() < 10 ? "0" + oNow.getMinutes() : oNow.getMinutes()) + ":" + (oNow.getSeconds() < 10 ? "0" + oNow.getSeconds() : oNow.getSeconds());/* + " " + oNow.toLocaleDateString();*/
 		
-		SetSaveMessage( "Last saved at " + sTimestamp + " to <a href=" + sURL + ">" + sURL + "</a>", true);
+		SetSaveMessage( "Saved! Your URL is <br><a href=" + sURL + ">" + sURL + "</a><br>Bookmark or share this link to access your saved machine.<br><span style='font-size: small; font-style: italic;'>Last saved at " + sTimestamp + "</span>", true);
+		
+	} else {
+		debug( 1, "Error: Save failed. Missing data or id from Github response." );
+		SetSaveMessage( "Save failed, sorry :(", false );
 	}
 }
 
 function saveErrorCallback( oData, sStatus, oRequestObj )
 {
-	debug( 1, "Error: save request failed!" );
-	SetSaveMessage( "Save failed :(", false );
+	debug( 1, "Error: Save failed. AJAX request to Github failed. HTTP response " + oRequestObj.status + " " + oRequestObj.statusText );
+	SetSaveMessage( "Save failed, sorry :(", false );
 }
 
 function SetSaveMessage( sStr, bOK )
 {
-	$("#SaveStatus").html( sStr );
+	$("#SaveStatusMsg").html( sStr );
+	$("#SaveStatus").slideDown();
+	$("#SaveStatusBg").stop(true, true).css("background-color",(bOK?"#88ee99":"#eb8888")).show().fadeOut(800);
 }
 
-function LoadProgram( zName )
+function ClearSaveMessage()
+{
+	$("#SaveStatusMsg").empty();
+	$("#SaveStatus").hide();
+}
+
+function LoadSampleProgram( zName, zFriendlyName, bInitial )
 {
 	debug( 1, "Load '" + zName + "'" );
+	SetStatusMessage( "Loading sample program..." );
 	var zFileName = "machines/" + zName + ".txt";
-	var oRequest = new XMLHttpRequest();
-	oRequest.onreadystatechange = function()
-	{
-		if( oRequest.readyState == 4 )
-		{
+	
+	StopTimer();   /* Stop machine, if currently running */
+	
+	$.ajax({
+		url: zFileName,
+		type: "GET",
+		dataType: "text",
+		success: function( sData, sStatus, oRequestObj ) {
 			/* Load the default initial tape, if any */
 			var oRegExp = new RegExp( ";.*\\$INITIAL_TAPE:? *(.+)$" );
-			var sData = oRequest.responseText;
-			var aResult = oRegExp.exec( sData );
-			if( aResult != null && aResult.length >= 2 ) {
-				debug( 4, "Parsed initial tape: '" + aResult + "' length: " + (aResult == null ? "null" : aResult.length) );
-				$("#InitialInput")[0].value = aResult[1];
+			var aRegexpResult = oRegExp.exec( sData );
+			if( aRegexpResult != null && aRegexpResult.length >= 2 ) {
+				debug( 4, "Parsed initial tape: '" + aRegexpResult + "' length: " + (aRegexpResult == null ? "null" : aRegexpResult.length) );
+				$("#InitialInput")[0].value = aRegexpResult[1];
 				sData = sData.replace( /^.*\$INITIAL_TAPE:.*$/m, "" );
 			}
 
@@ -687,11 +712,16 @@ function LoadProgram( zName )
 			
 			/* Reset the machine  */
 			Reset( $('#InitialInput')[0].value );
+			if( !bInitial ) SetStatusMessage( zFriendlyName + " successfully loaded");
+		},
+		error: function( oData, sStatus, oRequestObj ) {
+			debug( 1, "Error: Load failed. HTTP response " + oRequestObj.status + " " + oRequestObj.statusText );
+			SetStatusMessage( "Error loading " + zFriendlyName + " :(" );
 		}
-	};
+	});
 	
-	oRequest.open( "GET", zFileName, true );
-	oRequest.send( null );
+	$("#LoadMenu").slideUp();
+	ClearSaveMessage();
 }
 
 /* onchange function for textarea */
@@ -784,13 +814,22 @@ function OnLoad()
 	oTextarea = $("#Source")[0];
 	TextareaChanged();
 	
-	if( window.location.hash ) {
+	if( window.location.search != "" ) {
 		SetStatusMessage( "Loading saved machine..." );
-		LoadFromCloud( window.location.hash.substring( 1 ) );
-		window.location.hash = "";
+		LoadFromCloud( window.location.search.substring( 1 ) );
+		window.history.replaceState( null, "", window.location.pathname );  /* Remove query string from URL */
 	} else {
-		LoadProgram( 'concatenate' );
-		SetStatusMessage( 'Load or write a Turing program below and click Run!' );
+		LoadSampleProgram( 'concatenate', 'Default program', true );
+		SetStatusMessage( 'Load or write a Turing machine program and click Run!' );
 	}
 }
 
+
+function x( z )
+{
+	if( z ) {
+		saveSuccessCallback( {id: "!!!WHACK!!!" + $.now(), url: "http://wha.ck/xxx"} );
+	} else {
+		saveErrorCallback( {id: "!!!WHACK!!!" + $.now(), url: "http://wha.ck/xxx"}, null, {status: -1, statusText: 'dummy'} );
+	}
+}

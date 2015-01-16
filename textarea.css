@@ -15,7 +15,9 @@
 	background-color: transparent;
 	display: inline;
 	width: 800px;
+	min-width: 600px;
 	height: 400px;
+	min-height: 250px;
 /*	margin-left: 46px; */
 	font-family: monospace;
 	font-size: 15;
