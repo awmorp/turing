@@ -14,7 +14,7 @@ var nDebugLevel = 0;
 var bFullSpeed = false;   /* If true, run at full speed with no delay between steps */
 
 var bIsReset = false;   /* true if the machine has been reset, false if it is or has been running */
-var sTape = "0110110";
+var sTape = "";
 var nHeadPosition = 0;   /* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
 var sState = "0";
 var nTapeOffset = 0;     /* the logical position on TM tape of the first character of sTape */
@@ -163,7 +163,7 @@ function StopTimer()
 function Reset( sInitialTape )
 {
 	if( sInitialTape == null ) sInitialTape = "";
-	sTape = sInitialTape;
+	sTape = (sInitialTape != "" ? sInitialTape : " ");
 	nSteps = 0;
 	nHeadPosition = 0;
 	nTapeOffset = 0;
@@ -202,13 +202,15 @@ function GetMachineSnapshot()
 		"headposition": nHeadPosition,
 		"steps": nSteps,
 		"initialtape": $("#InitialInput")[0].value,
-		"fullspeed": bFullSpeed
+		"fullspeed": bFullSpeed,
+		"version": 1		/* Internal version number */
 	});
 }
 
 /* LoadMachineState(): Load a machine and state from an object created by GetMachineSnapshot */
 function LoadMachineSnapshot( oObj )
 {
+	if( oObj.version && oObj.version != 1 ) debug( 1, "Warning: saved machine has unknown version number " + oObj.version );
 	if( oObj.program ) oTextarea.value = oObj.program;
 	if( oObj.state ) sState = oObj.state;
 	if( oObj.tape ) sTape = oObj.tape;
@@ -616,6 +618,7 @@ function loadErrorCallback( oData, sStatus, oRequestObj )
 
 function SaveToCloud()
 {
+	SetSaveMessage( "Saving...", null );
 	var oUnpackedObject = GetMachineSnapshot();
 	var gistApiInput = {
 		"description": "Saved Turing machine state from http://morphett.info/turing/turing.html",
@@ -649,25 +652,27 @@ function saveSuccessCallback( oData )
 		
 		var sTimestamp = (oNow.getHours() < 10 ? "0" + oNow.getHours() : oNow.getHours()) + ":" + (oNow.getMinutes() < 10 ? "0" + oNow.getMinutes() : oNow.getMinutes()) + ":" + (oNow.getSeconds() < 10 ? "0" + oNow.getSeconds() : oNow.getSeconds());/* + " " + oNow.toLocaleDateString();*/
 		
-		SetSaveMessage( "Saved! Your URL is <br><a href=" + sURL + ">" + sURL + "</a><br>Bookmark or share this link to access your saved machine.<br><span style='font-size: small; font-style: italic;'>Last saved at " + sTimestamp + "</span>", true);
+		SetSaveMessage( "Saved! Your URL is <br><a href=" + sURL + ">" + sURL + "</a><br>Bookmark or share this link to access your saved machine.<br><span style='font-size: small; font-style: italic;'>Last saved at " + sTimestamp + "</span>", 1 );
 		
 	} else {
 		debug( 1, "Error: Save failed. Missing data or id from Github response." );
-		SetSaveMessage( "Save failed, sorry :(", false );
+		SetSaveMessage( "Save failed, sorry :(", 2 );
 	}
 }
 
 function saveErrorCallback( oData, sStatus, oRequestObj )
 {
 	debug( 1, "Error: Save failed. AJAX request to Github failed. HTTP response " + oRequestObj.status + " " + oRequestObj.statusText );
-	SetSaveMessage( "Save failed, sorry :(", false );
+	SetSaveMessage( "Save failed, sorry :(", 2 );
 }
 
-function SetSaveMessage( sStr, bOK )
+function SetSaveMessage( sStr, nBgFlash )
 {
 	$("#SaveStatusMsg").html( sStr );
 	$("#SaveStatus").slideDown();
-	$("#SaveStatusBg").stop(true, true).css("background-color",(bOK?"#88ee99":"#eb8888")).show().fadeOut(800);
+	if( nBgFlash ) {	/* Flash background of notification */
+		$("#SaveStatusBg").stop(true, true).css("background-color",(nBgFlash==1?"#88ee99":"#eb8888")).show().fadeOut(800);
+	}
 }
 
 function ClearSaveMessage()
@@ -828,7 +833,7 @@ function AboutMenuClicked( name )
 }
 
 
-/*
+
 function x( z )
 {
 	if( z ) {
@@ -837,4 +842,3 @@ function x( z )
 		saveErrorCallback( {id: "!!!WHACK!!!" + $.now(), url: "http://wha.ck/xxx"}, null, {status: -1, statusText: 'dummy'} );
 	}
 }
-*/

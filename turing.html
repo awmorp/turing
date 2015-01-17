@@ -96,8 +96,9 @@
        <button id="StopButton" onclick="StopButton();" disabled="true" title="Pause the machine when running">Pause</button><br> <!-- &#x25fe; !-->
        <button id="StepButton" onclick="StepButton();" title="Run the machine for a single step and the pause">Step</button><br> <!-- &#x25b8;&#x2759; !-->
        <button id="ResetButton" onclick="ResetButton();" title="Reset the machine and tape to the initial state">Reset</button> <!-- &#x2759;&#x23ea; !-->
+       <br>
        <span id="InitialTapeDisplay"  title="This initial data will be loaded on the tape when the machine starts">
-        Input:<input type="text" id="InitialInput" value=""/>
+        Initial input:<input type="text" id="InitialInput" value=""/>
        </span>
        <br>
        <br>
@@ -124,7 +125,7 @@
        </div> <!-- div inputProg !-->
        <br>
        <a href="javascript:" onclick="SaveToCloud();" title="Save your machine to the cloud for sharing or bookmarking">Save to the cloud</a>
-       <!--...<a href="javascript:" onclick="x(true);">test ok</a>...<a href="javascript:" onclick="x(false);">test error</a>!-->
+       ...<a href="javascript:" onclick="x(true);">test ok</a>...<a href="javascript:" onclick="x(false);">test error</a>
        <div id="SaveStatus">
         <div id="SaveStatusFg">
          <div id="SaveStatusMsg"></div>
