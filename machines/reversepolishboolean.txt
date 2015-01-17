@@ -1,10 +1,11 @@
-; Simple stack language interpreter.
-; Evaluates boolean expressions entered in reverse polish notation.
-; Input: a boolean expression in reverse polish.
+; This is a simple stack language interpreter.
+; It evaluates Boolean expressions entered in reverse Polish notation.
+; Input: a Boolean expression in reverse Polish.
 ; Use 1,0,&,|,~ for true, false, and, or not, respectively, without spaces.
 ; Example inputs:
 ;   11&    - returns 1  (= 1 and 1)
 ;   01~1|& - returns 0    (= (not 1 or 1) and 0)
+
 
 ; Find next command
 0 _ _ r 0
@@ -79,5 +80,5 @@
 147 _ _ r 0
 147 * * r 147
 
-
+; Exercise: extend this to support other binary operators, eg XOR, NAND
 ; Load a suitable initial tape: $INITIAL_TAPE: 10~1&|0|

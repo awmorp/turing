@@ -1,7 +1,7 @@
 ; Tests if a given number is prime.
 ; Input: a single natural number in binary.
 
-; This is extraordinarily inefficient.  For instance, it loops down from the input rather than up from 2.
+; This is very inefficient and slow, so be prepared to wait!
 
 ; set up environment
 0 * * l 1

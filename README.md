@@ -3,7 +3,7 @@ jsturing
 
 Turing machine simulator in HTML/Javascript
 
-This is the source for the HTML/Javascript Turing machine simulator at http://morphett.info/turing/turing.html
+This is the source for the HTML/Javascript Turing machine simulator at http://morphett.info/turing/
 
 
 File description:

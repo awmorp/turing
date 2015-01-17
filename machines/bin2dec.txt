@@ -1,5 +1,5 @@
 ; Converts a number from binary to decimal.
-; It does this by successively incrementing the decimal counted and decrementing the binary input until 0 is reached.
+; It does this by successively incrementing the decimal counter and decrementing the binary input until 0 is reached.
 ; Input: A single number in binary.
 
 0 * * * 1

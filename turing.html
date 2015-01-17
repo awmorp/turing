@@ -15,12 +15,12 @@
    <div class="backlinks">
     [<a href="http://morphett.info/default.html">Back to home page</a>]
    </div>
-   <div id="IntroText" class="collabsible">
+   <div id="IntroText">
     This is a <a href="http://en.wikipedia.org/wiki/Turing_machine">Turing machine</a> simulator.
     To use it:<br>
     <ol>
      <li>
-      Load one of the example programs, or write your own in the Turing machine program area.  See below for syntax.
+      <a href="#loadmenu" onclick="$('#LoadMenu').slideDown();">Load one of the example programs</a>, or write your own in the Turing machine program area.  See <a href="#syntax">below for syntax</a>.
      </li>
      <li>
       Enter something in the 'Input' area - this will be written on the tape initially as input to the machine. Click 'Reset' to initialise the machine.
@@ -88,7 +88,7 @@
      <div id="MachineControlBlock">
       <div class="BoxTitle">Controls</div>
       <div id="MachineButtonsBlock">
-       <button id="RunButton" onclick="RunButton();" title="Start the machine running">Run</button> <!-- &#x25b8; !-->
+       <button id="RunButton" onclick="RunButton();" title="Start the machine running">Run</button> <!-- &#x25b8; !--> <!-- Unicode 'play' symbol !-->
        <span title="If enabled, runs as fast as your browser &amp; computer allow">
         <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();"/>Run at full speed
        </span>
@@ -103,26 +103,28 @@
        <br>
        <br>
        <div id="LoadBlock">
-        <a href="javascript:" onclick="$('#LoadMenu').slideToggle();">Load an example program</a>
+        <a name="loadmenu"></a>
+        <a href="javascript:" onclick="$('#LoadMenu').slideToggle();" title="Load a pre-prepared example program">Load an example program</a>
         <div id="LoadMenu">
          <ul>
-          <li><a href="javascript:" onclick="LoadSampleProgram('concatenate', 'Concatenate strings machine');">Concatenate strings</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('palindrome', 'Palindrome detector');">Palindrome detector</a></li>
           <li><a href="javascript:" onclick="LoadSampleProgram('binaryadd', 'Binary addition machine');">Binary addition</a></li>
           <li><a href="javascript:" onclick="LoadSampleProgram('binarymult', 'Binary multiplication machine');">Binary multiplication</a></li>
           <li><a href="javascript:" onclick="LoadSampleProgram('bin2dec', 'Binary to decimal conversion machine');">Binary to decimal conversion</a></li>
           <li><a href="javascript:" onclick="LoadSampleProgram('turingsequence', 'Turing\'s sequence machine');">Turing's sequence machine</a></li>
           <li><a href="javascript:" onclick="LoadSampleProgram('parentheses', 'Parentheses checker machine');">Parentheses checker</a></li>
-          <li><a href="javascript:" onclick="LoadSampleProgram('reversepolishboolean', 'Reverse polish boolean calculator');">Reverse polish boolean calculator</a></li>
+          <li><a href="javascript:" onclick="LoadSampleProgram('reversepolishboolean', 'Reverse Polish Boolean calculator');">Reverse Polish Boolean calculator</a></li>
           <li><a href="javascript:" onclick="LoadSampleProgram('primetest', 'Primality test machine');">Primality test</a></li>
           <li><a href="javascript:" onclick="LoadSampleProgram('4statebeaver', '4-state busy beaver');">4-state busy beaver</a></li>
           <li><a href="javascript:" onclick="LoadSampleProgram('universal', 'Universal Turing machine');">Universal Turing machine</a></li>
-          <li><a href="javascript:" onclick="LoadSampleProgram('error', 'Error machine');">Error</a></li>
+          <!--<li><a href="javascript:" onclick="LoadSampleProgram('error', 'Error machine');">Error</a></li>!--> <!-- for testing !-->
          </ul>
          <span style="font-size: x-small;"><a href="javascript:" onclick="$('#LoadMenu').hide();">[Close]</a></span>
         </div>
        </div> <!-- div inputProg !-->
        <br>
-       <a href="javascript:" onclick="x(true);">Save to the cloud</a>...<a href="javascript:" onclick="x(false);">not</a>...<a href="javascript:" onclick="SaveToCloud();">no rly</a>
+       <a href="javascript:" onclick="SaveToCloud();" title="Save your machine to the cloud for sharing or bookmarking">Save to the cloud</a>
+       <!--...<a href="javascript:" onclick="x(true);">test ok</a>...<a href="javascript:" onclick="x(false);">test error</a>!-->
        <div id="SaveStatus">
         <div id="SaveStatusFg">
          <div id="SaveStatusMsg"></div>
@@ -139,34 +141,54 @@
    </div> <!-- div MachineLowerSection !-->
 
   </div> <!-- div Machine !-->
-  <div id="SyntaxInfo" class="collabsible">Syntax:
+  <a name="syntax">
+  <div id="SyntaxInfo">Syntax:
    <ul>
     <li>Each line should contain one tuple of the form '<code>&lt;current state&gt; &lt;current symbol&gt; &lt;new symbol&gt; &lt;direction&gt; &lt;new state&gt;</code>'.</li>
-    <li>You can use any number or word for <code>&lt;current state&gt;</code> and <code>&lt;new state&gt;</code>, eg <code>0, a, state1</code>. State labels are case-sensitive.</li>
-    <li><code>halt</code> is the halting state. The machine starts in state <code>0</code>.</li>
+    <li>You can use any number or word for <code>&lt;current state&gt;</code> and <code>&lt;new state&gt;</code>, eg. <code>0, a, state1</code>. State labels are case-sensitive.</li>
+    <li>The machine starts in state <code>0</code>.  It halts when it reaches any state starting with '<code>halt</code>', eg. <code>halt, halt-accept</code></li>
     <li>You can use any character for <code>&lt;current symbol&gt;</code> and <code>&lt;new symbol&gt;</code>, or '<code>_</code>' to represent blank (space). Symbols are case-sensitive.</li>
     <li><code>&lt;direction&gt;</code> should be '<code>l</code>', '<code>r</code>' or '<code>*</code>', denoting 'move left', 'move right' or 'do not move', respectively.</li>
     <li>Anything after a '<code>;</code>' is a comment and is ignored.</li>
    </ul>
    Also:
    <ul>
-    <li>'<code>*</code>' can be used in <code>&lt;current symbol&gt;</code> or <code>&lt;current state&gt;</code> to match any character or state.</li>
+    <li>'<code>*</code>' can be used as a wildcard in <code>&lt;current symbol&gt;</code> or <code>&lt;current state&gt;</code> to match any character or state.</li>
     <li>'<code>*</code>' can be used in <code>&lt;new symbol&gt;</code> or <code>&lt;new state&gt;</code> to mean 'no change'.</li>
     <li>'<code>!</code>' can be used at the end of a line to set a breakpoint, eg '<code>1 a b r 2 !</code>'. The machine will automatically pause after executing this line.</li>
    </ul>
   </div>
-  <div id="MetaInfo" class="collabsible">
-   <div>
-    Technical details: The Turing machine simulator is written in HTML/Javascript.  Saved machines are stored as anonymous GISTs on <a href="https://gist.github.com/">GitHub's GIST</a> service.  Source code for this simulator is <a href="https://github.com/awmorp/jsturing">available on GitHub</a>.  You are welcome to download, fork, copy, or modify the code.
+  </a>
+  <div id="AboutMenu">
+   <div id="AboutItemTech" class="AboutItem"><a href="javascript:" onclick="AboutMenuClicked('Tech');">Technical details</a></div>
+   -
+   <div id="AboutItemMail" class="AboutItem"><a href="javascript:" onclick="AboutMenuClicked('Mail');">Mailing list</a></div>
+   -
+   <div id="AboutItemCopying" class="AboutItem"><a href="javascript:" onclick="AboutMenuClicked('Copying');">Copying</a></div>
+   -
+   <div id="AboutItemOld" class="AboutItem"><a href="javascript:" onclick="AboutMenuClicked('Old');">Previous version</a></div>
+   -
+   <div id="AboutItemContact" class="AboutItem"><a href="javascript:" onclick="AboutMenuClicked('Contact');">Feedback</a></div>
+   <div id="AboutContentContainer">
+    <div id="AboutContentTech" class="AboutContent">
+     The Turing machine simulator is written in HTML/Javascript, and uses <a href="http://jquery.com">jQuery</a>.  Saved machines are stored as anonymous GISTs on <a href="https://gist.github.com/">GitHub's GIST</a> service.  You can browse the code <a href="https://github.com/awmorp/jsturing">here on GitHub</a>.
+    </div>
+    <div id="AboutContentMail" class="AboutContent">
+     <a href="http://www.freelists.org/list/jsturing">Subscribe to the mailing list</a> for occasional updates and news about the Turing machine simulator (typically 1-2 emails per year).
+    </div>
+    <div id="AboutContentCopying" class="AboutContent">
+     Source code for this simulator is <a href="https://github.com/awmorp/jsturing">available on GitHub</a>.  You are welcome to download, copy, or adapt the code to your own needs.  If you are doing something interesting with it, I'd be happy to hear from you about it.
+    </div>
+    <div id="AboutContentOld" class="AboutContent">
+     The previous version of the Turing machine simulator is <a href="old/turing.html">still available here</a>.
+    </div>
+    <div id="AboutContentContact" class="AboutContent">
+     Please send any bug reports, feedback, suggestions, etc. to <a href="http://morphett.info/">Anthony Morphett</a>, awmorp @ gmail.com
+    </div>
    </div>
-   <br>
-   <div>
-    Mailing list: <a href="http://www.freelists.org/list/jsturing">Subscribe to the mailing list</a> for occasional updates and news about the Turing machine simulator (typically 1-2 emails per year).
-   </div>
-   
   </div>
   <div class="Signature">
-   -- <a href="http://morphett.info/default.html">Anthony Morphett</a> - awmorp @ gmail.com
+   -- <a href="http://morphett.info/">Anthony Morphett</a> - awmorp @ gmail.com
   </div>
   <div id="debugOuter" class="DebugClass">
    Debug: <button id="ClearDebugButton" onclick="ClearDebug();">clear</button>

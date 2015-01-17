@@ -1,7 +1,5 @@
-; Binary addition - add two binary numbers (separated by space)
-; Assumes input of two binary numbers separated by a single space
-
-; Machine syntax: <current state> <current symbol> <new symbol> <direction> <new state>
+; Binary addition - adds two binary numbers
+; Input: two binary numbers, separated by a single space, eg '100 1110'
 
 0 _ _ r 1
 0 * * r 0

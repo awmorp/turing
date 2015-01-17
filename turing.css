@@ -19,6 +19,7 @@ body {
   margin-top: 10px;
   margin-bottom: 10px;
 /*  height: 10em; */
+  max-width: 95%;
   text-align: center;
   display: inline-block;
 }
@@ -45,12 +46,14 @@ body {
 
 #MachineTape {
   background-color: #eee8aa;
-  height: 50px;
   margin-left: 5%;
   margin-right: 5%;
   padding-top: 10px;
+  padding-left: 0px;
   font-size: x-large;
   margin-bottom: 1em;
+  overflow: auto;
+  position: relative;
 }
 
 
@@ -63,10 +66,12 @@ body {
 
 #LeftTape {
   text-align: right;
+  padding-left: 10px;
 }
 
 #RightTape {
   text-align: left;
+  padding-right: 10px;
 }
 
 #ActiveTape {
@@ -84,8 +89,9 @@ body {
 }
 
 #RunningTapeDisplay {
-  overflow: auto;
+/*  overflow: auto; */
   height: 2.5em;
+  white-space: pre;
 }
 
 #InitialTapeDisplay {
@@ -94,7 +100,7 @@ body {
 
 .MachineStatusContainer {
   text-align: center;
-  width: 100px;
+  width: 150px;
   position: relative;
   top: -1em;
   margin: 0;
@@ -186,6 +192,7 @@ body {
   padding: 4px;
   margin-top: 4px;
   padding-top: 12px;
+  padding-bottom: 15px;
   background: #dedede;
 }
 
@@ -260,15 +267,39 @@ h1 {
   margin-bottom: 0.2em;
 }
 
+code {
+/*  background: #e0e0e0;*/
+  font-size: larger;
+}
+
 #SyntaxInfo {
   text-align: left;
   margin-left: 2em;
   margin-bottom: 10px;
 }
 
-#MetaInfo {
+#AboutMenu {
   text-align: left;
   margin-left: 2em;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+
+.AboutItem {
+  display: inline;
+}
+
+.AboutContent {
+  display: none;
+}
+
+#AboutContentContainer {
+  margin-top: 8px;
+  margin-left: 20px;
+}
+
+#MetaInfo div {
+  margin-top: 0.5em;
 }
 
 #LoadMenu {

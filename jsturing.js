@@ -1,18 +1,15 @@
 /* JavaScript Turing machine emulator */
 /* Anthony Morphett - awmorp@gmail.com */
 
-/* Version 2.0 - December 2014 */
+/* Version 2.0 - January 2015 */
 /* Uses jquery (1.11.1) */
 
 /* TODO:
-     - properly handle long tape
-     - better default example program - palindrome checker?
-     - factorial program?
-
+     - factorial sample program ?
 */
 
 
-var nDebugLevel = 1;
+var nDebugLevel = 0;
 
 var bFullSpeed = false;   /* If true, run at full speed with no delay between steps */
 
@@ -301,16 +298,12 @@ function RenderTape()
 	$("#RightTape").text( sSecondPart );
 	debug( 4, "RenderTape(): LeftTape = '" + $("#LeftTape").text() + "' ActiveTape = '" + $("#ActiveTape").text() + "' RightTape = '" + $("#RightTape").text() + "'" );
 	
-	/* If reset, display the initial input box; if not, display the tape */
-/*	if( bIsReset ) {
-		$( "#RunningTapeDisplay" ).toggle( false );
-		$( "#InitialTapeDisplay" ).toggle( true ); 
-	} else {
-		$( "#RunningTapeDisplay" ).toggle( true );
-		$( "#InitialTapeDisplay" ).toggle( false ); 
-	
+	/* Scroll tape display to make sure that head is visible */
+	if( $("#ActiveTapeArea").position().left < 0 ) {
+		$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + $("#ActiveTapeArea").position().left - 10 );
+	} else if( $("#ActiveTapeArea").position().left + $("#ActiveTapeArea").width() > $("#MachineTape").width() ) {
+		$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + ($("#ActiveTapeArea").position().left - $("#MachineTape").width()) + 10 );
 	}
-*/
 }
 
 function RenderState()
@@ -647,7 +640,7 @@ function SaveToCloud()
 function saveSuccessCallback( oData )
 {
 	if( oData && oData.id ) {
-		var sURL = window.location.href.replace(/\?.*/,"")		/* Strip off any query parameters, ie "?12345678" */
+		var sURL = window.location.href.replace(/[\#\?].*/,"");		/* Strip off any hash or query parameters, ie "?12345678" */
 		sURL += "?" + oData.id;									/* Append gist id as query string */
 		//var sURL = "http://morphett.info/turing/turing.html" + "?" + oData.id;
 		debug( 1, "Save successful. Gist ID is " + oData.id + " Gist URL is " + oData.url /*+ ", user URL is " + sURL */ );
@@ -819,12 +812,23 @@ function OnLoad()
 		LoadFromCloud( window.location.search.substring( 1 ) );
 		window.history.replaceState( null, "", window.location.pathname );  /* Remove query string from URL */
 	} else {
-		LoadSampleProgram( 'concatenate', 'Default program', true );
+		LoadSampleProgram( 'palindrome', 'Default program', true );
 		SetStatusMessage( 'Load or write a Turing machine program and click Run!' );
 	}
 }
 
 
+function AboutMenuClicked( name )
+{
+	$(".AboutItem").css( "font-weight", "normal" );
+	$("#AboutItem" + name).css( "font-weight", "bold" );
+
+	$(".AboutContent").slideUp({queue: false, duration: 150}).fadeOut(150);
+	$("#AboutContent" + name ).stop().detach().prependTo("#AboutContentContainer").fadeIn({queue: false, duration: 150}).css("display", "none").slideDown(150);
+}
+
+
+/*
 function x( z )
 {
 	if( z ) {
@@ -833,3 +837,4 @@ function x( z )
 		saveErrorCallback( {id: "!!!WHACK!!!" + $.now(), url: "http://wha.ck/xxx"}, null, {status: -1, statusText: 'dummy'} );
 	}
 }
+*/
