@@ -6,8 +6,6 @@
 
 /* TODO:
      - factorial sample program ?
-     
-     - line numbers not updating on change in IE9, IE8
 */
 
 

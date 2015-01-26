@@ -105,7 +105,7 @@
 	height: 14px;
 	background: #bbf8ff;
 	font-family: monospace;
-	font-size: 13;
+	font-size: 13px;
 /*	display: table-cell;
 	vertical-align: middle; */ /* Not working!? */
 	text-align: left;
@@ -159,7 +159,7 @@
 	height: 14px;
 	background: #ffcc99;
 	font-family: monospace;
-	font-size: 13;
+	font-size: 13px;
 /*	display: table-cell;
 	vertical-align: middle; */ /* Not working!? */
 	text-align: left;
