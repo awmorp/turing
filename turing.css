@@ -120,6 +120,7 @@ body {
 /*  text-align: center; */
   font-family: "Courier New", courier;
   background-color: #C9F2C9;
+  overflow: hidden;
 }
 
 
