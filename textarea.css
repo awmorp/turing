@@ -8,6 +8,8 @@
 	position: relative;
 	text-align: left;
 	overflow: hidden;
+	font-size: 15px;
+	font-family: monospace;
 /*	width: 100%;*/
 }
 
@@ -21,7 +23,9 @@
 /*	margin-left: 46px; */
 	font-family: monospace;
 	font-size: 15px;
+	line-height: 17px;
 	position: relative;
+	margin: 0px;
 }
 
 
@@ -60,6 +64,7 @@
 	width: 100%;
 	background-color: white;
 	position: relative;
+	height: 17px;
 }
 
 .talinebg .talinebgnonum {

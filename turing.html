@@ -1,18 +1,19 @@
-<!--<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">!-->
-<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
  <head>
-  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link href="turing.css" rel="stylesheet" type="text/css">
   <link href="textarea.css" rel="stylesheet" type="text/css">
   <title>
    Turing machine simulator
   </title>
   <script type="text/javascript" defer="defer" src="jquery-1.11.1.js"></script>
-  <!--[if lt IE 10]>
+  <!--[if lte IE 9]>
    <script type="text/javascript" src="polyfills.js"></script>
+  <![endif]-->
+  <!--[if lt IE 8]>
    <link href="ie-fixes.css" rel="stylesheet" type="text/css">
-  <![endif]-->  <!-- Conditional comment for IE versions < 10. Disable line highlighting and load Javscript polyfills for old IE versions. !-->
+  <![endif]-->  <!-- Conditional comments for old IE versions. Adjust or disable line highlighting and load Javscript polyfills if needed for old IE versions. !-->
   <script type="text/javascript" defer="defer" src="jsturing.js"></script>
  </head>
 
@@ -20,7 +21,7 @@
   <div id="Header">
    <h1>Turing machine simulator</h1>
    <div class="backlinks">
-    [<a href="http://morphett.info/default.html">Back to home page</a>]
+    [<a href="http://morphett.info/">Back to home page</a>]
    </div>
    <div id="IntroText">
     This is a <a href="http://en.wikipedia.org/wiki/Turing_machine">Turing machine</a> simulator.

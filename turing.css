@@ -7,9 +7,10 @@ body {
 }
 
 #Machine {
-  border: 3px solid #ff6666;
-/*  background-color: #dfdfda;*/
-  background-color: #ffe1e1;
+  border: 2px solid #ff6666;
+/*  background-color: #dfdfda; */
+/*  background-color: #ffe1e1; */
+  background-color: #ffefda;
   padding-top: 0.5em;
   padding-bottom: 0.25em;
   padding-left: 0.5em;
@@ -33,7 +34,7 @@ body {
   height: 15px;
   display: inline; 
   background-color: #eeeeee;
-  background: solid;
+/*  background: solid;*/
   border: 1px solid grey;
   font-family: sans-serif;
 /*  font-variant: small-caps; */

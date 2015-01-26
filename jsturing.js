@@ -6,6 +6,8 @@
 
 /* TODO:
      - factorial sample program ?
+     
+     - line numbers not updating on change in IE9, IE8
 */
 
 
@@ -807,6 +809,12 @@ function UpdateTextareaScroll()
 function OnLoad()
 {
 	if( nDebugLevel > 0 ) $(".DebugClass").toggle( true );
+	
+	if( typeof( isOldIE ) != "undefined" ) {
+		debug( 1, "Old version of IE detected, adding extra textarea events" );
+		/* Old versions of IE need onkeypress event for textarea as well as onchange */
+		$("#Source").on( "keypress change", TextareaChanged );
+	}
 
 	oTextarea = $("#Source")[0];
 	TextareaChanged();
