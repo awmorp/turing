@@ -11,13 +11,13 @@
 
 var nDebugLevel = 0;
 
-var bFullSpeed = false;   /* If true, run at full speed with no delay between steps */
+var bFullSpeed = false;	/* If true, run at full speed with no delay between steps */
 
-var bIsReset = false;   /* true if the machine has been reset, false if it is or has been running */
-var sTape = "";
-var nHeadPosition = 0;   /* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
+var bIsReset = false;		/* true if the machine has been reset, false if it is or has been running */
+var sTape = "";				/* Contents of TM's tape. Stores all cells that have been visited by the head */
+var nTapeOffset = 0;		/* the logical position on TM tape of the first character of sTape */
+var nHeadPosition = 0;		/* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
 var sState = "0";
-var nTapeOffset = 0;     /* the logical position on TM tape of the first character of sTape */
 var nSteps = 0;
 var hRunTimer = null;
 var aProgram = new Object();
@@ -67,8 +67,8 @@ function Step()
 	
 	var sNewState, sNewSymbol, nAction, nLineNumber;
 	
-	/* Find current symbol (may not be in sTape as sTape only stores modified tape cells) */
-	var sHeadSymbol = GetTapeSymbol( nHeadPosition - nTapeOffset );
+	/* Get current symbol */
+	var sHeadSymbol = GetTapeSymbol( nHeadPosition );
 	
 	/* Find appropriate TM instruction */
 	var oInstruction = FindNextInstruction( sState, sHeadSymbol );
@@ -96,7 +96,7 @@ function Step()
 	nSteps++;
 	
 	oPrevInstruction = oInstruction;
-	oNextInstruction = FindNextInstruction( sNewState, GetTapeSymbol( nHeadPosition - nTapeOffset ) );
+	oNextInstruction = FindNextInstruction( sNewState, GetTapeSymbol( nHeadPosition ) );
 	
 	debug( 4, "Step() finished. New tape: '" + sTape + "'  new state: '" + sState + "'  action: " + nAction + "  line number: " + nLineNumber  );
 	UpdateInterface();
@@ -172,7 +172,7 @@ function Reset( sInitialTape )
 	
 	Compile();
 	oPrevInstruction = null;
-	oNextInstruction = FindNextInstruction( sState, GetTapeSymbol( nHeadPosition - nTapeOffset ) );
+	oNextInstruction = FindNextInstruction( sState, GetTapeSymbol( nHeadPosition ) );
 	
 	EnableControls( true, true, false, true, true, true );
 	UpdateInterface();
@@ -182,11 +182,13 @@ function Reset( sInitialTape )
 /* GetTapeSymbol( n ): returns the symbol at cell n of the TM tape */
 function GetTapeSymbol( n )
 {
-	if( n >= sTape.length || n < 0 ) {
+	if( n < nTapeOffset || n >= sTape.length + nTapeOffset ) {
+		debug( 4, "GetTapeSymbol( " + n + " ) = '" + c + "'   outside sTape range" );
 		return( "_" );
 	} else {
-		var c = sTape.charAt( n );
-		if( c == " " ) { c = "_"; debug( 4, "GetTapeSymbol() got SPACE not _ !!!" ); }
+		var c = sTape.charAt( n - nTapeOffset );
+		if( c == " " ) { c = "_"; debug( 4, "Warning: GetTapeSymbol() got SPACE not _ !" ); }
+		debug( 4, "GetTapeSymbol( " + n + " ) = '" + c + "'" );
 		return( c );
 	}
 }
@@ -235,21 +237,18 @@ function LoadMachineSnapshot( oObj )
 }
 
 /* SetTapeSymbol( n, c ): writes symbol c to cell n of the TM tape */
-function SetTapeSymbol( nPos, c )
+function SetTapeSymbol( n, c )
 {
-	var n = nPos - nTapeOffset;
-	debug( 4, "SetTapeSymbol( " + nPos + ", " + c + " ); n = " + n + "; nTapeOffset = " + nTapeOffset );
-	if( c == " " ) { c = "_"; debug( 4, "SetTapeSymbol() with SPACE not _ !!!" ); }
-	if( n >= 0 && n < sTape.length ) {
-		sTape = sTape.substr( 0, n ) + c + sTape.substr( n + 1 );
-		debug( 5, "  n >= 0 && n < sTape.length; sTape = '" + sTape + "'" );
-	} else if( n < 0 && c != "_" ) {
-		sTape = c + repeat( "_", -1 - n ) + sTape;
-		nTapeOffset += n;
-		debug( 5, "  n < 0 && c != '_'; sTape = '" + sTape + "'  nTapeOffset = " + nTapeOffset );
-	} else if( c != "_" ) { /* n >= sTape.length */
-		sTape = sTape + repeat( "_", n - sTape.length ) + c;
-		debug( 5, " c != ' ' && n >= sTape.length; sTape = '" + sTape + "'" );
+	debug( 4, "SetTapeSymbol( " + n + ", " + c + " ); sTape = '" + sTape + "' nTapeOffset = " + nTapeOffset );
+	if( c == " " ) { c = "_"; debug( 4, "Warning: SetTapeSymbol() with SPACE not _ !" ); }
+	
+	if( n < nTapeOffset ) {
+		sTape = c + repeat( "_", nTapeOffset - n - 1 ) + sTape;
+		nTapeOffset = n;
+	} else if( n > nTapeOffset + sTape.length ) {
+		sTape = sTape + repeat( "_", nTapeOffset + sTape.length - n - 1 ) + c;
+	} else {
+		sTape = sTape.substr( 0, n - nTapeOffset ) + c + sTape.substr( n - nTapeOffset + 1 );
 	}
 }
 
@@ -263,15 +262,15 @@ function RenderTape()
 	*/
 	var nTranslatedHeadPosition = nHeadPosition - nTapeOffset;  /* position of the head relative to sTape */
 	var sFirstPart, sHeadSymbol, sSecondPart;
-	debug( 4, "translated head pos: " + nTranslatedHeadPosition + "  head pos: " + nHeadPosition + "  tape offset: " + nTapeOffset );
-	debug( 4, "sTape = '" + sTape + "'" );
+	debug( 4, "RenderTape: translated head pos: " + nTranslatedHeadPosition + "  head pos: " + nHeadPosition + "  tape offset: " + nTapeOffset );
+	debug( 4, "RenderTape: sTape = '" + sTape + "'" );
 
 	if( nTranslatedHeadPosition > 0 ) {
 		sFirstPart = sTape.substr( 0, nTranslatedHeadPosition );
 	} else {
 		sFirstPart = "";
 	}
-	if( nTranslatedHeadPosition > sTape.length ) {  /* need to append blanks to sFirstPart */
+	if( nTranslatedHeadPosition > sTape.length ) {  /* Need to append blanks to sFirstPart.  Shouldn't happen but just in case. */
 		sFirstPart += repeat( " ", nTranslatedHeadPosition - sTape.length );
 	}
 	sFirstPart = sFirstPart.replace( /_/g, " " );
@@ -279,26 +278,26 @@ function RenderTape()
 	if( nTranslatedHeadPosition >= 0 && nTranslatedHeadPosition < sTape.length ) {
 		sHeadSymbol = sTape.charAt( nTranslatedHeadPosition );
 	} else {
-		sHeadSymbol = " ";
+		sHeadSymbol = " ";	/* Shouldn't happen but just in case */
 	}
 	sHeadSymbol = sHeadSymbol.replace( /_/g, " " );
 	
 	if( nTranslatedHeadPosition >= 0 && nTranslatedHeadPosition < sTape.length - 1 ) {
 		sSecondPart = sTape.substr( nTranslatedHeadPosition + 1 );
-	} else if( nTranslatedHeadPosition < 0 ) {  /* need to prepend blanks to sSecondPart */
+	} else if( nTranslatedHeadPosition < 0 ) {  /* Need to prepend blanks to sSecondPart. Shouldn't happen but just in case. */
 		sSecondPart = repeat( " ", -nTranslatedHeadPosition - 1 ) + sTape;
 	} else {  /* nTranslatedHeadPosition > sTape.length */
 		sSecondPart = "";
 	}
 	sSecondPart = sSecondPart.replace( /_/g, " " );
 	
-	debug( 4, "RenderTape(): sFirstPart = '" + sFirstPart + "' sHeadSymbol = '" + sHeadSymbol + "'  sSecondPart = '" + sSecondPart + "'" );
+	debug( 4, "RenderTape: sFirstPart = '" + sFirstPart + "' sHeadSymbol = '" + sHeadSymbol + "'  sSecondPart = '" + sSecondPart + "'" );
 	
 	/* Display the parts of the tape */
 	$("#LeftTape").text( sFirstPart );
 	$("#ActiveTape").text( sHeadSymbol );
 	$("#RightTape").text( sSecondPart );
-	debug( 4, "RenderTape(): LeftTape = '" + $("#LeftTape").text() + "' ActiveTape = '" + $("#ActiveTape").text() + "' RightTape = '" + $("#RightTape").text() + "'" );
+//	debug( 4, "RenderTape(): LeftTape = '" + $("#LeftTape").text() + "' ActiveTape = '" + $("#ActiveTape").text() + "' RightTape = '" + $("#RightTape").text() + "'" );
 	
 	/* Scroll tape display to make sure that head is visible */
 	if( $("#ActiveTapeArea").position().left < 0 ) {
@@ -406,7 +405,7 @@ function Compile()
 	
 	/* Lines have changed. Previous line is no longer meaningful, recalculate next line. */
 	oPrevInstruction = null;
-	oNextInstruction = FindNextInstruction( sState, GetTapeSymbol( nHeadPosition - nTapeOffset ) );
+	oNextInstruction = FindNextInstruction( sState, GetTapeSymbol( nHeadPosition ) );
 	
 	bIsDirty = false;
 	
@@ -440,43 +439,43 @@ function ParseLine( sLine, nLineNum )
 	
 	if( aTokens.length < 2 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing current symbol!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing &lt;current symbol&gt;!" ;
 		return( oTuple );
 	}
 	if( aTokens[1].length > 1 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": current symbol should be a single character!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": &lt;current symbol&gt; should be a single character!" ;
 		return( oTuple );
 	}
 	oTuple.currentSymbol = aTokens[1];
 	
 	if( aTokens.length < 3 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing new symbol!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing &lt;new symbol&gt;!" ;
 		return( oTuple );
 	}
 	if( aTokens[2].length > 1 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": new symbol should be a single character!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": &lt;new symbol&gt; should be a single character!" ;
 		return( oTuple );
 	}
 	oTuple.newSymbol = aTokens[2];
 	
 	if( aTokens.length < 4 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing direction!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing &lt;direction&gt;!" ;
 		return( oTuple );
 	}
 	if( ["l","r","*"].indexOf( aTokens[3].toLowerCase() ) < 0 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": direction should be 'l', 'r' or '*'!";
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": &lt;direction&gt; should be 'l', 'r' or '*'!";
 		return( oTuple );
 	}
 	oTuple.action = aTokens[3].toLowerCase();
 
 	if( aTokens.length < 5 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing new state!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing &lt;new state&gt;!" ;
 		return( oTuple );
 	}
 	oTuple.newState = aTokens[4];

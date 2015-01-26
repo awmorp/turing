@@ -1,0 +1,14 @@
+/* Line highlighting is broken in IE versions < 10.  This disables line highlighting in these versions. */
+/* This file is loaded by a IE conditional comment from turing.html */
+
+#SourceBackground {
+  display: none;
+}
+
+#tabackground {
+  background: transparent;
+}
+
+#Source {
+  background: white;
+}

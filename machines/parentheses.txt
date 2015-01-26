@@ -56,16 +56,22 @@
 
 ; Parentheses balanced
 60 ! _ r 60
-60 * ☺ * halt-accept
+60 * * * accept
 
 ; Parentheses unbalanced - missing )
 70 _ _ r 71
 70 * * l 70
-71 _ ☹ * halt-reject
+71 _ * * reject
 71 * _ r 71
 
 ; Parentheses unbalanced - missing (
-80 _ ☹ * halt-reject
+80 _ * * reject
 80 * _ r 80
+
+accept * : r accept2
+accept2 * ) * halt-accept
+
+reject * : r reject2
+reject2 * ( * halt-reject
 
 ;$INITIAL_TAPE: 3*(2+(3^(4-1)))

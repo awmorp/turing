@@ -1,11 +1,18 @@
+<!--<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">!-->
+<!DOCTYPE html>
 <html>
  <head>
+  <meta charset="utf-8">
   <link href="turing.css" rel="stylesheet" type="text/css">
   <link href="textarea.css" rel="stylesheet" type="text/css">
   <title>
    Turing machine simulator
   </title>
   <script type="text/javascript" defer="defer" src="jquery-1.11.1.js"></script>
+  <!--[if lt IE 10]>
+   <script type="text/javascript" src="polyfills.js"></script>
+   <link href="ie-fixes.css" rel="stylesheet" type="text/css">
+  <![endif]-->  <!-- Conditional comment for IE versions < 10. Disable line highlighting and load Javscript polyfills for old IE versions. !-->
   <script type="text/javascript" defer="defer" src="jsturing.js"></script>
  </head>
 
@@ -20,7 +27,7 @@
     To use it:<br>
     <ol>
      <li>
-      <a href="#loadmenu" onclick="$('#LoadMenu').slideDown();">Load one of the example programs</a>, or write your own in the Turing machine program area.  See <a href="#syntax">below for syntax</a>.
+      <a href="#LoadMenu" onclick="$('#LoadMenu').slideDown();">Load one of the example programs</a>, or write your own in the Turing machine program area.  See <a href="#SyntaxInfo">below for syntax</a>.
      </li>
      <li>
       Enter something in the 'Input' area - this will be written on the tape initially as input to the machine. Click 'Reset' to initialise the machine.
@@ -90,21 +97,20 @@
       <div id="MachineButtonsBlock">
        <button id="RunButton" onclick="RunButton();" title="Start the machine running">Run</button> <!-- &#x25b8; !--> <!-- Unicode 'play' symbol !-->
        <span title="If enabled, runs as fast as your browser &amp; computer allow">
-        <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();"/>Run at full speed
+        <input type="checkbox" id="SpeedCheckbox" onclick="SpeedCheckbox();">Run at full speed
        </span>
        <br>
-       <button id="StopButton" onclick="StopButton();" disabled="true" title="Pause the machine when running">Pause</button><br> <!-- &#x25fe; !-->
+       <button id="StopButton" onclick="StopButton();" disabled="disabled" title="Pause the machine when running">Pause</button><br> <!-- &#x25fe; !-->
        <button id="StepButton" onclick="StepButton();" title="Run the machine for a single step and the pause">Step</button><br> <!-- &#x25b8;&#x2759; !-->
        <button id="ResetButton" onclick="ResetButton();" title="Reset the machine and tape to the initial state">Reset</button> <!-- &#x2759;&#x23ea; !-->
        <br>
        <span id="InitialTapeDisplay"  title="This initial data will be loaded on the tape when the machine starts">
-        Initial input:<input type="text" id="InitialInput" value=""/>
+        Initial input:<input type="text" id="InitialInput" value="">
        </span>
        <br>
        <br>
        <br>
        <div id="LoadBlock">
-        <a name="loadmenu"></a>
         <a href="javascript:" onclick="$('#LoadMenu').slideToggle();" title="Load a pre-prepared example program">Load an example program</a>
         <div id="LoadMenu">
          <ul>
@@ -125,7 +131,7 @@
        </div> <!-- div inputProg !-->
        <br>
        <a href="javascript:" onclick="SaveToCloud();" title="Save your machine to the cloud for sharing or bookmarking">Save to the cloud</a>
-       ...<a href="javascript:" onclick="x(true);">test ok</a>...<a href="javascript:" onclick="x(false);">test error</a>
+       <!--...<a href="javascript:" onclick="x(true);">test ok</a>...<a href="javascript:" onclick="x(false);">test error</a>!--> <!-- for testing !-->
        <div id="SaveStatus">
         <div id="SaveStatusFg">
          <div id="SaveStatusMsg"></div>
@@ -142,7 +148,6 @@
    </div> <!-- div MachineLowerSection !-->
 
   </div> <!-- div Machine !-->
-  <a name="syntax">
   <div id="SyntaxInfo">Syntax:
    <ul>
     <li>Each line should contain one tuple of the form '<code>&lt;current state&gt; &lt;current symbol&gt; &lt;new symbol&gt; &lt;direction&gt; &lt;new state&gt;</code>'.</li>
@@ -159,7 +164,6 @@
     <li>'<code>!</code>' can be used at the end of a line to set a breakpoint, eg '<code>1 a b r 2 !</code>'. The machine will automatically pause after executing this line.</li>
    </ul>
   </div>
-  </a>
   <div id="AboutMenu">
    <div id="AboutItemTech" class="AboutItem"><a href="javascript:" onclick="AboutMenuClicked('Tech');">Technical details</a></div>
    -

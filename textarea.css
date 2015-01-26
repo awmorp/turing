@@ -20,7 +20,7 @@
 	min-height: 250px;
 /*	margin-left: 46px; */
 	font-family: monospace;
-	font-size: 15;
+	font-size: 15px;
 	position: relative;
 }
 
@@ -33,7 +33,7 @@
 	width: 100%;
 	z-index: 0;
 	font-family: monospace;
-	font-size: 15;
+	font-size: 15px;
 	text-align: left;
 }
 
