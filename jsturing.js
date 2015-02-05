@@ -109,11 +109,8 @@ function Step()
 		return( false );
 	} else {
 		if( oInstruction.breakpoint ) {
-			SetStatusMessage( "Stopped at breakpoint on line " + nLineNumber );
-			if( hRunTimer != null ) {
-				EnableControls( true, true, false, true, true, true );
-				StopTimer();
-			}
+			SetStatusMessage( "Stopped at breakpoint on line " + (nLineNumber+1) );
+			EnableControls( true, true, false, true, true, true );
 			return( false );
 		} else {
 			return( true );
