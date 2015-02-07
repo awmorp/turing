@@ -98,7 +98,11 @@ body {
 }
 
 #InitialTapeDisplay {
-  display: inline;
+  margin-bottom: 4px;
+}
+
+#InitialState {
+  width: 50px;
 }
 
 .MachineStatusContainer {

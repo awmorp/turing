@@ -5,6 +5,8 @@
 /* Uses jquery (1.11.1) */
 
 /* TODO:
+     - user-specified start state: need to sanitize input
+     - user-specified start head position
      - factorial sample program ?
 */
 
@@ -35,24 +37,6 @@ var oPrevInstruction = null;
 var oNextInstruction = null;
 
 
-/* FindNextInstruction(): look up the next instruction for the given state and symbol */
-function FindNextInstruction(sState, sHeadSymbol)
-{
-	if( aProgram[sState] != null && aProgram[sState][sHeadSymbol] != null ) {
-		/* Use instruction specifically corresponding to current state & symbol, if any */
-		return( aProgram[sState][sHeadSymbol] );
-	} else if( aProgram[sState] != null && aProgram[sState]["*"] != null ) {
-		/* Next use rule for the current state and default symbol, if any */
-		return( aProgram[sState]["*"] );
-	} else if( aProgram["*"] != null && aProgram["*"][sHeadSymbol] != null ) {
-		/* Next use rule for default state and current symbol, if any */
-		return( aProgram["*"][sHeadSymbol] );
-	} else if( aProgram["*"] != null && aProgram["*"]["*"] != null ) {
-		/* Finally use rule for default state and default symbol */
-		return( aProgram["*"]["*"] );
-	} else return( null );
-}
-
 /* Step(): run the Turing machine for one step. Returns false if the machine is in halt state at the end of the step, true otherwise. */
 function Step()
 {
@@ -60,8 +44,9 @@ function Step()
 	
 	bIsReset = false;
 	if( sState.substring(0,4).toLowerCase() == "halt" ) {
-		debug( 1, "Warning: Step() called while in halt state" );
+		/* debug( 1, "Warning: Step() called while in halt state" ); */
 		SetStatusMessage( "Halted." );
+		EnableControls( false, false, false, true, true, true );
 		return( false );
 	}
 	
@@ -71,7 +56,7 @@ function Step()
 	var sHeadSymbol = GetTapeSymbol( nHeadPosition );
 	
 	/* Find appropriate TM instruction */
-	var oInstruction = FindNextInstruction( sState, sHeadSymbol );
+	var oInstruction = GetNextInstruction( sState, sHeadSymbol );
 	
 	if( oInstruction != null ) {
 		sNewState = (oInstruction.newState == "*" ? sState : oInstruction.newState);
@@ -96,7 +81,7 @@ function Step()
 	nSteps++;
 	
 	oPrevInstruction = oInstruction;
-	oNextInstruction = FindNextInstruction( sNewState, GetTapeSymbol( nHeadPosition ) );
+	oNextInstruction = GetNextInstruction( sNewState, GetTapeSymbol( nHeadPosition ) );
 	
 	debug( 4, "Step() finished. New tape: '" + sTape + "'  new state: '" + sState + "'  action: " + nAction + "  line number: " + nLineNumber  );
 	UpdateInterface();
@@ -156,191 +141,37 @@ function StopTimer()
 }
 
 
-/* Reset( sInitialTape ): restore the TM state etc to its initial value and load the tape with sInitialTape */
-function Reset( sInitialTape )
+/* Reset( ): re-initialise the TM */
+function Reset()
 {
-	if( sInitialTape == null ) sInitialTape = "";
-	sTape = (sInitialTape != "" ? sInitialTape : " ");
-	nSteps = 0;
-	nHeadPosition = 0;
+	var sInitialTape = $("#InitialInput")[0].value;
+
+	/* Find the initial head location, if given */
+	nHeadPosition = sInitialTape.indexOf( "*" );
+	if( nHeadPosition == -1 ) nHeadPosition = 0;
+
+	/* Initialise tape */
+	sInitialTape = sInitialTape.replace( /\*/g, "" ).replace( / /g, "_" );
+	if( sInitialTape == "" ) sInitialTape = " ";
+	sTape = sInitialTape;
 	nTapeOffset = 0;
-	sState = "0";
+	
+	/* Initialise state */
+	var sInitialState = $("#InitialState")[0].value;
+	sInitialState = $.trim( sInitialState ).split(" ")[0];
+	if( !sInitialState || sInitialState == "" ) sInitialState = "0";
+	sState = sInitialState;
+	
+	nSteps = 0;
 	bIsReset = true;
 	
 	Compile();
 	oPrevInstruction = null;
-	oNextInstruction = FindNextInstruction( sState, GetTapeSymbol( nHeadPosition ) );
+	oNextInstruction = GetNextInstruction( sState, GetTapeSymbol( nHeadPosition ) );
 	
 	EnableControls( true, true, false, true, true, true );
 	UpdateInterface();
 }
-
-
-/* GetTapeSymbol( n ): returns the symbol at cell n of the TM tape */
-function GetTapeSymbol( n )
-{
-	if( n < nTapeOffset || n >= sTape.length + nTapeOffset ) {
-		debug( 4, "GetTapeSymbol( " + n + " ) = '" + c + "'   outside sTape range" );
-		return( "_" );
-	} else {
-		var c = sTape.charAt( n - nTapeOffset );
-		if( c == " " ) { c = "_"; debug( 4, "Warning: GetTapeSymbol() got SPACE not _ !" ); }
-		debug( 4, "GetTapeSymbol( " + n + " ) = '" + c + "'" );
-		return( c );
-	}
-}
-
-/* GetMachineSnapshot(): Store the current machine and state as an object suitable for saving as JSON */
-function GetMachineSnapshot()
-{
-	return( {
-		"program": oTextarea.value,
-		"state": sState,
-		"tape": sTape,
-		"tapeoffset": nTapeOffset,
-		"headposition": nHeadPosition,
-		"steps": nSteps,
-		"initialtape": $("#InitialInput")[0].value,
-		"fullspeed": bFullSpeed,
-		"version": 1		/* Internal version number */
-	});
-}
-
-/* LoadMachineState(): Load a machine and state from an object created by GetMachineSnapshot */
-function LoadMachineSnapshot( oObj )
-{
-	if( oObj.version && oObj.version != 1 ) debug( 1, "Warning: saved machine has unknown version number " + oObj.version );
-	if( oObj.program ) oTextarea.value = oObj.program;
-	if( oObj.state ) sState = oObj.state;
-	if( oObj.tape ) sTape = oObj.tape;
-	if( oObj.tapeoffset ) nTapeOffset = oObj.tapeoffset;
-	if( oObj.headposition ) nHeadPosition = oObj.headposition;
-	if( oObj.steps ) nSteps = oObj.steps;
-	if( oObj.initialtape ) $("#InitialInput")[0].value = oObj.initialtape;
-	if( oObj.fullspeed ) {
-		$("#SpeedCheckbox")[0].checked = oObj.fullspeed;
-		bFullSpeed = oObj.fullspeed;
-	}
-	if( sState.substring(0,4).toLowerCase() == "halt" ) {
-		SetStatusMessage( "Machine loaded. Halted." );
-		EnableControls( false, false, false, true, true, true );
-	} else {
-		SetStatusMessage( "Machine loaded and ready" );
-		EnableControls( true, true, false, true, true, true );
-	}
-	TextareaChanged();
-	Compile();
-	UpdateInterface();
-}
-
-/* SetTapeSymbol( n, c ): writes symbol c to cell n of the TM tape */
-function SetTapeSymbol( n, c )
-{
-	debug( 4, "SetTapeSymbol( " + n + ", " + c + " ); sTape = '" + sTape + "' nTapeOffset = " + nTapeOffset );
-	if( c == " " ) { c = "_"; debug( 4, "Warning: SetTapeSymbol() with SPACE not _ !" ); }
-	
-	if( n < nTapeOffset ) {
-		sTape = c + repeat( "_", nTapeOffset - n - 1 ) + sTape;
-		nTapeOffset = n;
-	} else if( n > nTapeOffset + sTape.length ) {
-		sTape = sTape + repeat( "_", nTapeOffset + sTape.length - n - 1 ) + c;
-	} else {
-		sTape = sTape.substr( 0, n - nTapeOffset ) + c + sTape.substr( n - nTapeOffset + 1 );
-	}
-}
-
-/* RenderTape(): show the tape contents and head position in the MachineTape div */
-function RenderTape()
-{
-	/* calculate the strings:
-	  sFirstPart is the portion of the tape to the left of the head
-	  sHeadSymbol is the symbol under the head
-	  sSecondPart is the portion of the tape to the right of the head
-	*/
-	var nTranslatedHeadPosition = nHeadPosition - nTapeOffset;  /* position of the head relative to sTape */
-	var sFirstPart, sHeadSymbol, sSecondPart;
-	debug( 4, "RenderTape: translated head pos: " + nTranslatedHeadPosition + "  head pos: " + nHeadPosition + "  tape offset: " + nTapeOffset );
-	debug( 4, "RenderTape: sTape = '" + sTape + "'" );
-
-	if( nTranslatedHeadPosition > 0 ) {
-		sFirstPart = sTape.substr( 0, nTranslatedHeadPosition );
-	} else {
-		sFirstPart = "";
-	}
-	if( nTranslatedHeadPosition > sTape.length ) {  /* Need to append blanks to sFirstPart.  Shouldn't happen but just in case. */
-		sFirstPart += repeat( " ", nTranslatedHeadPosition - sTape.length );
-	}
-	sFirstPart = sFirstPart.replace( /_/g, " " );
-	
-	if( nTranslatedHeadPosition >= 0 && nTranslatedHeadPosition < sTape.length ) {
-		sHeadSymbol = sTape.charAt( nTranslatedHeadPosition );
-	} else {
-		sHeadSymbol = " ";	/* Shouldn't happen but just in case */
-	}
-	sHeadSymbol = sHeadSymbol.replace( /_/g, " " );
-	
-	if( nTranslatedHeadPosition >= 0 && nTranslatedHeadPosition < sTape.length - 1 ) {
-		sSecondPart = sTape.substr( nTranslatedHeadPosition + 1 );
-	} else if( nTranslatedHeadPosition < 0 ) {  /* Need to prepend blanks to sSecondPart. Shouldn't happen but just in case. */
-		sSecondPart = repeat( " ", -nTranslatedHeadPosition - 1 ) + sTape;
-	} else {  /* nTranslatedHeadPosition > sTape.length */
-		sSecondPart = "";
-	}
-	sSecondPart = sSecondPart.replace( /_/g, " " );
-	
-	debug( 4, "RenderTape: sFirstPart = '" + sFirstPart + "' sHeadSymbol = '" + sHeadSymbol + "'  sSecondPart = '" + sSecondPart + "'" );
-	
-	/* Display the parts of the tape */
-	$("#LeftTape").text( sFirstPart );
-	$("#ActiveTape").text( sHeadSymbol );
-	$("#RightTape").text( sSecondPart );
-//	debug( 4, "RenderTape(): LeftTape = '" + $("#LeftTape").text() + "' ActiveTape = '" + $("#ActiveTape").text() + "' RightTape = '" + $("#RightTape").text() + "'" );
-	
-	/* Scroll tape display to make sure that head is visible */
-	if( $("#ActiveTapeArea").position().left < 0 ) {
-		$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + $("#ActiveTapeArea").position().left - 10 );
-	} else if( $("#ActiveTapeArea").position().left + $("#ActiveTapeArea").width() > $("#MachineTape").width() ) {
-		$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + ($("#ActiveTapeArea").position().left - $("#MachineTape").width()) + 10 );
-	}
-}
-
-function RenderState()
-{
-	$("#MachineState").html( sState );
-}
-
-function RenderSteps()
-{
-	$("#MachineSteps").html( nSteps );
-}
-
-function RenderLineMarkers()
-{
-	debug( 3, "Rendering line markers: " + (oNextInstruction?oNextInstruction.sourceLineNumber:-1) + " " + (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
-	SetActiveLines( (oNextInstruction?oNextInstruction.sourceLineNumber:-1), (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
-}
-
-/* SetStatusMessage( sString ): display sString in the status message area */
-function SetStatusMessage( sString )
-{
-	$("#MachineStatusMessagesContainer" ).html( sString );
-}
-
-/* UpdateInterface(): refresh the tape, state and steps displayed on the page */
-function UpdateInterface()
-{
-	RenderTape();
-	RenderState();
-	RenderSteps();
-	RenderLineMarkers();
-}
-
-/* SetSyntaxMessage(): display a syntax error message in the textarea */
-function SetSyntaxMessage( msg )
-{
-	$("#SyntaxMsg").html( (msg?msg:"&nbsp;") )
-}
-
 
 /* Compile(): parse the inputted program and store it in aProgram */
 function Compile()
@@ -402,7 +233,7 @@ function Compile()
 	
 	/* Lines have changed. Previous line is no longer meaningful, recalculate next line. */
 	oPrevInstruction = null;
-	oNextInstruction = FindNextInstruction( sState, GetTapeSymbol( nHeadPosition ) );
+	oNextInstruction = GetNextInstruction( sState, GetTapeSymbol( nHeadPosition ) );
 	
 	bIsDirty = false;
 	
@@ -498,23 +329,196 @@ function ParseLine( sLine, nLineNum )
 	return( oTuple );
 }
 
-/* return a string of n copies of c */
-function repeat( c, n )
+/* GetNextInstruction(): look up the next instruction for the given state and symbol */
+function GetNextInstruction(sState, sHeadSymbol)
 {
-	var sTmp = "";
-	while( n-- > 0 ) sTmp += c;
-	return sTmp;
+	if( aProgram[sState] != null && aProgram[sState][sHeadSymbol] != null ) {
+		/* Use instruction specifically corresponding to current state & symbol, if any */
+		return( aProgram[sState][sHeadSymbol] );
+	} else if( aProgram[sState] != null && aProgram[sState]["*"] != null ) {
+		/* Next use rule for the current state and default symbol, if any */
+		return( aProgram[sState]["*"] );
+	} else if( aProgram["*"] != null && aProgram["*"][sHeadSymbol] != null ) {
+		/* Next use rule for default state and current symbol, if any */
+		return( aProgram["*"][sHeadSymbol] );
+	} else if( aProgram["*"] != null && aProgram["*"]["*"] != null ) {
+		/* Finally use rule for default state and default symbol */
+		return( aProgram["*"]["*"] );
+	} else return( null );
+}
+
+/* GetTapeSymbol( n ): returns the symbol at cell n of the TM tape */
+function GetTapeSymbol( n )
+{
+	if( n < nTapeOffset || n >= sTape.length + nTapeOffset ) {
+		debug( 4, "GetTapeSymbol( " + n + " ) = '" + c + "'   outside sTape range" );
+		return( "_" );
+	} else {
+		var c = sTape.charAt( n - nTapeOffset );
+		if( c == " " ) { c = "_"; debug( 4, "Warning: GetTapeSymbol() got SPACE not _ !" ); }
+		debug( 4, "GetTapeSymbol( " + n + " ) = '" + c + "'" );
+		return( c );
+	}
 }
 
 
-function debug( n, str )
+/* SetTapeSymbol( n, c ): writes symbol c to cell n of the TM tape */
+function SetTapeSymbol( n, c )
 {
-	if( n <= 0 ) {
-		SetStatusMessage( str );
+	debug( 4, "SetTapeSymbol( " + n + ", " + c + " ); sTape = '" + sTape + "' nTapeOffset = " + nTapeOffset );
+	if( c == " " ) { c = "_"; debug( 4, "Warning: SetTapeSymbol() with SPACE not _ !" ); }
+	
+	if( n < nTapeOffset ) {
+		sTape = c + repeat( "_", nTapeOffset - n - 1 ) + sTape;
+		nTapeOffset = n;
+	} else if( n > nTapeOffset + sTape.length ) {
+		sTape = sTape + repeat( "_", nTapeOffset + sTape.length - n - 1 ) + c;
+	} else {
+		sTape = sTape.substr( 0, n - nTapeOffset ) + c + sTape.substr( n - nTapeOffset + 1 );
 	}
-	if( nDebugLevel >= n  ) {
-		$("#debug").append( document.createTextNode( str + "\n" ) );
+}
+
+
+/* SaveMachineSnapshot(): Store the current machine and state as an object suitable for saving as JSON */
+function SaveMachineSnapshot()
+{
+	return( {
+		"program": oTextarea.value,
+		"state": sState,
+		"tape": sTape,
+		"tapeoffset": nTapeOffset,
+		"headposition": nHeadPosition,
+		"steps": nSteps,
+		"initialtape": $("#InitialInput")[0].value,
+		"initialstate": $("#InitialState")[0].value,
+		"fullspeed": bFullSpeed,
+		"version": 1		/* Internal version number */
+	});
+}
+
+/* LoadMachineState(): Load a machine and state from an object created by SaveMachineSnapshot */
+function LoadMachineSnapshot( oObj )
+{
+	if( oObj.version && oObj.version != 1 ) debug( 1, "Warning: saved machine has unknown version number " + oObj.version );
+	if( oObj.program ) oTextarea.value = oObj.program;
+	if( oObj.state ) sState = oObj.state;
+	if( oObj.tape ) sTape = oObj.tape;
+	if( oObj.tapeoffset ) nTapeOffset = oObj.tapeoffset;
+	if( oObj.headposition ) nHeadPosition = oObj.headposition;
+	if( oObj.steps ) nSteps = oObj.steps;
+	if( oObj.initialtape ) $("#InitialInput")[0].value = oObj.initialtape;
+	if( oObj.initialstate ) {
+		$("#InitialState")[0].value = oObj.initialstate;
+	} else {
+		$("#InitialState")[0].value = "";
 	}
+	if( oObj.fullspeed ) {
+		$("#SpeedCheckbox")[0].checked = oObj.fullspeed;
+		bFullSpeed = oObj.fullspeed;
+	}
+	if( sState.substring(0,4).toLowerCase() == "halt" ) {
+		SetStatusMessage( "Machine loaded. Halted." );
+		EnableControls( false, false, false, true, true, true );
+	} else {
+		SetStatusMessage( "Machine loaded and ready" );
+		EnableControls( true, true, false, true, true, true );
+	}
+	TextareaChanged();
+	Compile();
+	UpdateInterface();
+}
+
+
+/* SetStatusMessage( sString ): display sString in the status message area */
+function SetStatusMessage( sString )
+{
+	$("#MachineStatusMessagesContainer" ).html( sString );
+}
+
+/* SetSyntaxMessage(): display a syntax error message in the textarea */
+function SetSyntaxMessage( msg )
+{
+	$("#SyntaxMsg").html( (msg?msg:"&nbsp;") )
+}
+
+/* RenderTape(): show the tape contents and head position in the MachineTape div */
+function RenderTape()
+{
+	/* calculate the strings:
+	  sFirstPart is the portion of the tape to the left of the head
+	  sHeadSymbol is the symbol under the head
+	  sSecondPart is the portion of the tape to the right of the head
+	*/
+	var nTranslatedHeadPosition = nHeadPosition - nTapeOffset;  /* position of the head relative to sTape */
+	var sFirstPart, sHeadSymbol, sSecondPart;
+	debug( 4, "RenderTape: translated head pos: " + nTranslatedHeadPosition + "  head pos: " + nHeadPosition + "  tape offset: " + nTapeOffset );
+	debug( 4, "RenderTape: sTape = '" + sTape + "'" );
+
+	if( nTranslatedHeadPosition > 0 ) {
+		sFirstPart = sTape.substr( 0, nTranslatedHeadPosition );
+	} else {
+		sFirstPart = "";
+	}
+	if( nTranslatedHeadPosition > sTape.length ) {  /* Need to append blanks to sFirstPart.  Shouldn't happen but just in case. */
+		sFirstPart += repeat( " ", nTranslatedHeadPosition - sTape.length );
+	}
+	sFirstPart = sFirstPart.replace( /_/g, " " );
+	
+	if( nTranslatedHeadPosition >= 0 && nTranslatedHeadPosition < sTape.length ) {
+		sHeadSymbol = sTape.charAt( nTranslatedHeadPosition );
+	} else {
+		sHeadSymbol = " ";	/* Shouldn't happen but just in case */
+	}
+	sHeadSymbol = sHeadSymbol.replace( /_/g, " " );
+	
+	if( nTranslatedHeadPosition >= 0 && nTranslatedHeadPosition < sTape.length - 1 ) {
+		sSecondPart = sTape.substr( nTranslatedHeadPosition + 1 );
+	} else if( nTranslatedHeadPosition < 0 ) {  /* Need to prepend blanks to sSecondPart. Shouldn't happen but just in case. */
+		sSecondPart = repeat( " ", -nTranslatedHeadPosition - 1 ) + sTape;
+	} else {  /* nTranslatedHeadPosition > sTape.length */
+		sSecondPart = "";
+	}
+	sSecondPart = sSecondPart.replace( /_/g, " " );
+	
+	debug( 4, "RenderTape: sFirstPart = '" + sFirstPart + "' sHeadSymbol = '" + sHeadSymbol + "'  sSecondPart = '" + sSecondPart + "'" );
+	
+	/* Display the parts of the tape */
+	$("#LeftTape").text( sFirstPart );
+	$("#ActiveTape").text( sHeadSymbol );
+	$("#RightTape").text( sSecondPart );
+//	debug( 4, "RenderTape(): LeftTape = '" + $("#LeftTape").text() + "' ActiveTape = '" + $("#ActiveTape").text() + "' RightTape = '" + $("#RightTape").text() + "'" );
+	
+	/* Scroll tape display to make sure that head is visible */
+	if( $("#ActiveTapeArea").position().left < 0 ) {
+		$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + $("#ActiveTapeArea").position().left - 10 );
+	} else if( $("#ActiveTapeArea").position().left + $("#ActiveTapeArea").width() > $("#MachineTape").width() ) {
+		$("#MachineTape").scrollLeft( $("#MachineTape").scrollLeft() + ($("#ActiveTapeArea").position().left - $("#MachineTape").width()) + 10 );
+	}
+}
+
+function RenderState()
+{
+	$("#MachineState").html( sState );
+}
+
+function RenderSteps()
+{
+	$("#MachineSteps").html( nSteps );
+}
+
+function RenderLineMarkers()
+{
+	debug( 3, "Rendering line markers: " + (oNextInstruction?oNextInstruction.sourceLineNumber:-1) + " " + (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
+	SetActiveLines( (oNextInstruction?oNextInstruction.sourceLineNumber:-1), (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
+}
+
+/* UpdateInterface(): refresh the tape, state and steps displayed on the page */
+function UpdateInterface()
+{
+	RenderTape();
+	RenderState();
+	RenderSteps();
+	RenderLineMarkers();
 }
 
 function ClearDebug()
@@ -567,7 +571,7 @@ function StopButton()
 function ResetButton()
 {
 	SetStatusMessage( "Machine reset. Click 'Run' or 'Step' to start." );
-	Reset( $.trim($("#InitialInput" )[0].value) );
+	Reset();
 	EnableControls( true, true, false, true, true, true );
 }
 
@@ -615,7 +619,7 @@ function loadErrorCallback( oData, sStatus, oRequestObj )
 function SaveToCloud()
 {
 	SetSaveMessage( "Saving...", null );
-	var oUnpackedObject = GetMachineSnapshot();
+	var oUnpackedObject = SaveMachineSnapshot();
 	var gistApiInput = {
 		"description": "Saved Turing machine state from http://morphett.info/turing/turing.html",
 		"public": false,
@@ -698,6 +702,7 @@ function LoadSampleProgram( zName, zFriendlyName, bInitial )
 				$("#InitialInput")[0].value = aRegexpResult[1];
 				sData = sData.replace( /^.*\$INITIAL_TAPE:.*$/m, "" );
 			}
+			$("#InitialState")[0].value = "0";
 
 			/* Load the program */
 			oTextarea.value = sData;
@@ -705,7 +710,7 @@ function LoadSampleProgram( zName, zFriendlyName, bInitial )
 			Compile();
 			
 			/* Reset the machine  */
-			Reset( $('#InitialInput')[0].value );
+			Reset();
 			if( !bInitial ) SetStatusMessage( zFriendlyName + " successfully loaded");
 		},
 		error: function( oData, sStatus, oRequestObj ) {
@@ -800,6 +805,17 @@ function UpdateTextareaScroll()
 	$(oBackgroundDiv).css( {'margin-top': (-1*$(oTextarea).scrollTop()) + "px"} );
 }
 
+
+function AboutMenuClicked( name )
+{
+	$(".AboutItem").css( "font-weight", "normal" );
+	$("#AboutItem" + name).css( "font-weight", "bold" );
+
+	$(".AboutContent").slideUp({queue: false, duration: 150}).fadeOut(150);
+	$("#AboutContent" + name ).stop().detach().prependTo("#AboutContentContainer").fadeIn({queue: false, duration: 150}).css("display", "none").slideDown(150);
+}
+
+
 /* OnLoad function for HTML body.  Initialise things when page is loaded. */
 function OnLoad()
 {
@@ -825,22 +841,32 @@ function OnLoad()
 }
 
 
-function AboutMenuClicked( name )
+/* for testing */
+function testsave( success )
 {
-	$(".AboutItem").css( "font-weight", "normal" );
-	$("#AboutItem" + name).css( "font-weight", "bold" );
-
-	$(".AboutContent").slideUp({queue: false, duration: 150}).fadeOut(150);
-	$("#AboutContent" + name ).stop().detach().prependTo("#AboutContentContainer").fadeIn({queue: false, duration: 150}).css("display", "none").slideDown(150);
-}
-
-
-
-function x( z )
-{
-	if( z ) {
+	if( success ) {
 		saveSuccessCallback( {id: "!!!WHACK!!!" + $.now(), url: "http://wha.ck/xxx"} );
 	} else {
 		saveErrorCallback( {id: "!!!WHACK!!!" + $.now(), url: "http://wha.ck/xxx"}, null, {status: -1, statusText: 'dummy'} );
 	}
 }
+
+/* return a string of n copies of c */
+function repeat( c, n )
+{
+	var sTmp = "";
+	while( n-- > 0 ) sTmp += c;
+	return sTmp;
+}
+
+
+function debug( n, str )
+{
+	if( n <= 0 ) {
+		SetStatusMessage( str );
+	}
+	if( nDebugLevel >= n  ) {
+		$("#debug").append( document.createTextNode( str + "\n" ) );
+	}
+}
+

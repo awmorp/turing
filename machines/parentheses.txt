@@ -74,4 +74,4 @@ accept2 * ) * halt-accept
 reject * : r reject2
 reject2 * ( * halt-reject
 
-;$INITIAL_TAPE: 3*(2+(3^(4-1)))
+;$INITIAL_TAPE: 12(2+(3^(4-1)))
