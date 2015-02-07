@@ -43,14 +43,16 @@ body {
 /*  font-weight: bold; */
 }
 
+#MachineTapeContainer {
+  max-width: 90vw;	/* Max width 90% of window width */
+  margin-left: 4%;
+  margin-right: 4%;
+}
 
 #MachineTape {
   background-color: #eee8aa;
-  margin-left: 5%;
-  margin-right: 5%;
   padding-top: 10px;
   padding-left: 0px;
-  max-width: 90vw;	/* Max width 90% of window width */
   font-size: x-large;
   margin-bottom: 1em;
   overflow: auto;

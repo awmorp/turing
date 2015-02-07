@@ -46,11 +46,13 @@
    </div>
   </div>
   <div id="Machine">
-   <div class="BoxTitle">Tape</div>
-   <div id="MachineTape" class="MachineStatusBox" title="This is the Turing machine's tape. The head position is indicated by the highlighted cell and arrow.">
-    <!-- the following pre elements must be on a single line with no whitespace between them !-->
-    <div id="RunningTapeDisplay"><pre id="LeftTape" class="tape"></pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"> </pre><div id="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"></pre></div>
-   </div> <!-- div MachineTape !-->
+   <div id="MachineTapeContainer">
+    <div class="BoxTitle">Tape</div>
+    <div id="MachineTape" class="MachineStatusBox" title="This is the Turing machine's tape. The head position is indicated by the highlighted cell and arrow.">
+     <!-- the following pre elements must be on a single line with no whitespace between them !-->
+     <div id="RunningTapeDisplay"><pre id="LeftTape" class="tape"></pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"> </pre><div id="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"></pre></div>
+    </div> <!-- div MachineTape !-->
+   </div>
 
    <div id="MachineMiddleSection">
     <pre id="MachineStatusMessagesContainer">
