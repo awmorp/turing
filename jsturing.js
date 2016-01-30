@@ -40,6 +40,8 @@ var oPrevLineMarker = $("<div id='PrevLineMarker'>Prev<div id='PrevLineMarkerEnd
 var oPrevInstruction = null;
 var oNextInstruction = null;
 
+var sPreviousStatusMsg = "";  /* Most recent status message, for flashing alerts */
+
 
 /* Step(): run the Turing machine for one step. Returns false if the machine is in halt state at the end of the step, true otherwise. */
 function Step()
@@ -70,7 +72,7 @@ function Step()
 	} else {
 		/* No matching rule found; halt */
 		debug( 1, "Warning: no instruction found for state '" + sState + "' symbol '" + sHeadSymbol + "'; halting" );
-		SetStatusMessage( "Halted. No rule for state '" + sState + "' and symbol '" + sHeadSymbol + "'." );
+		SetStatusMessage( "Halted. No rule for state '" + sState + "' and symbol '" + sHeadSymbol + "'.", 2 );
 		sNewState = "halt";
 		sNewSymbol = sHeadSymbol;
 		nAction = 0;
@@ -122,6 +124,8 @@ function Undo()
     sState = oUndoData.state;
     nHeadPosition = oUndoData.position;
     SetTapeSymbol( nHeadPosition, oUndoData.symbol );
+    oPrevInstruction = null;
+    oNextInstruction = GetNextInstruction( sState, oUndoData.symbol );
     debug( 3, "Undone one step. New state: '" + sState + "' position : " + nHeadPosition + " symbol: '" + oUndoData.symbol + "'" );
     EnableControls( true, true, false, true, true, true, true );
     SetStatusMessage( "Undone one step." /*+ (aUndoList.length == 0 ? " No more undoes available." : " (" + aUndoList.length + " remaining)")*/ );
@@ -448,10 +452,10 @@ function LoadMachineSnapshot( oObj )
 	}
 	aUndoList = [];
 	if( sState.substring(0,4).toLowerCase() == "halt" ) {
-		SetStatusMessage( "Machine loaded. Halted." );
+		SetStatusMessage( "Machine loaded. Halted.", 1 );
 		EnableControls( false, false, false, true, true, true, true );
 	} else {
-		SetStatusMessage( "Machine loaded and ready" );
+		SetStatusMessage( "Machine loaded and ready", 1  );
 		EnableControls( true, true, false, true, true, true, true );
 	}
 	TextareaChanged();
@@ -460,10 +464,18 @@ function LoadMachineSnapshot( oObj )
 }
 
 
-/* SetStatusMessage( sString ): display sString in the status message area */
-function SetStatusMessage( sString )
+/* SetStatusMessage(): display sString in the status message area */
+/* nBgFlash: 1: flash green for success; 2: flash red for failure; -1: do not flash, even if repeating a message */
+function SetStatusMessage( sString, nBgFlash )
 {
-	$("#MachineStatusMessagesContainer" ).html( sString );
+	$( "#MachineStatusMsgText" ).html( sString );
+  if( nBgFlash > 0 ) {
+    $("#MachineStatusMsgBg").stop(true, true).css("background-color",(nBgFlash==1?"#c9f2c9":"#ffb3b3")).show().fadeOut(600);
+  }
+  if( sString != "" && sPreviousStatusMsg == sString && nBgFlash != -1 ) {
+    $("#MachineStatusMsgBg").stop(true, true).css("background-color","#bbf8ff").show().fadeOut(600);
+  }
+  if( sString != "" ) sPreviousStatusMsg = sString;
 }
 
 /* SetSyntaxMessage(): display a syntax error message in the textarea */
@@ -571,8 +583,6 @@ function EnableControls( bStep, bRun, bStop, bReset, bSpeed, bTextarea, bUndo )
   } else {
     $( "#SpeedCheckboxLabel" ).addClass( "disabled" );
   }
-//  debugger;
-//  debug( 3, "Enable Undo: " + !(bUndo && aUndoList.length > 0) );
 }
 
 function EnableUndoButton(bUndo)
@@ -584,7 +594,7 @@ function EnableUndoButton(bUndo)
 
 function StepButton()
 {
-	SetStatusMessage( " " );
+	SetStatusMessage( "", -1 );
 	Step();
 	EnableUndoButton(true);
 }
@@ -635,7 +645,7 @@ function loadSuccessCallback( oData )
 {
 	if( !oData || !oData.files || !oData.files["machine.json"] || !oData.files["machine.json"].content ) {
 		debug( 1, "Error: Load AJAX request succeeded but can't find expected data." );
-		SetStatusMessage( "Error loading saved machine :(" );
+		SetStatusMessage( "Error loading saved machine :(", 2 );
 		return;
 	}
 	var oUnpackedObject;
@@ -643,7 +653,7 @@ function loadSuccessCallback( oData )
 		oUnpackedObject = JSON.parse( oData.files["machine.json"].content );
 	} catch( e ) {
 		debug( 1, "Error: Exception when unpacking JSON: " + e );
-		SetStatusMessage( "Error loading saved machine :(" );
+		SetStatusMessage( "Error loading saved machine :(", 2 );
 		return;
 	}
 	LoadMachineSnapshot( oUnpackedObject );
@@ -652,7 +662,7 @@ function loadSuccessCallback( oData )
 function loadErrorCallback( oData, sStatus, oRequestObj )
 {
 	debug( 1, "Error: Load failed. AJAX request to Github failed. HTTP response " + oRequestObj );
-	SetStatusMessage( "Error loading saved machine :(" );
+	SetStatusMessage( "Error loading saved machine :(", 2 );
 }
 
 function SaveToCloud()
@@ -750,11 +760,11 @@ function LoadSampleProgram( zName, zFriendlyName, bInitial )
 			
 			/* Reset the machine  */
 			Reset();
-			if( !bInitial ) SetStatusMessage( zFriendlyName + " successfully loaded");
+			if( !bInitial ) SetStatusMessage( zFriendlyName + " successfully loaded", 1 );
 		},
 		error: function( oData, sStatus, oRequestObj ) {
 			debug( 1, "Error: Load failed. HTTP response " + oRequestObj.status + " " + oRequestObj.statusText );
-			SetStatusMessage( "Error loading " + zFriendlyName + " :(" );
+			SetStatusMessage( "Error loading " + zFriendlyName + " :(", 2 );
 		}
 	});
 	

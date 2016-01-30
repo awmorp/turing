@@ -146,13 +146,32 @@ body {
   width: 100%;
 }
 
-#MachineStatusMessagesContainer {
+#MachineStatusMsgWrapper {
+  position: relative;
+  display: inline;
+/*  z-index: 10; */
+}
+
+#MachineStatusMsgBg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+  background-color: #88eeee;
+  display: none;
+}
+
+#MachineStatusMsgText {
   text-align: center;
   width: 60%;
   height: 3em;
   display: inline;
   position: relative;
   font-size: larger;
+  z-index: 2;
+  padding: 0.5em;
 }
 
 #MachineLowerSection {
