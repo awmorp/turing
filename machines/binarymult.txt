@@ -80,8 +80,8 @@
 52 * * l 52
 53 o o l 53
 53 i i l 53
-53 _ 1 r 55
-53 0 i l 55 ; return to num2
+53 _ i r 55
+53 0 i r 55 ; return to num2
 53 1 o l 54
 54 0 1 r 55
 54 1 0 l 54
