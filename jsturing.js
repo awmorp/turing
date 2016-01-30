@@ -27,6 +27,10 @@ var aProgram = new Object();
    Its members are objects with properties newSymbol, action, newState, breakpoint and sourceLineNumber.
 */
 
+var nMaxUndo = 10;  /* Maximum number of undo steps */
+var aUndoList = [];
+/* aUndoList is an array of 'deltas' in the form {previous-state, direction, previous-symbol}. */
+
 /* Variables for the source line numbering, markers */
 var nTextareaLines = -1;
 var oTextarea;
@@ -46,7 +50,7 @@ function Step()
 	if( sState.substring(0,4).toLowerCase() == "halt" ) {
 		/* debug( 1, "Warning: Step() called while in halt state" ); */
 		SetStatusMessage( "Halted." );
-		EnableControls( false, false, false, true, true, true );
+		EnableControls( false, false, false, true, true, true, true );
 		return( false );
 	}
 	
@@ -73,6 +77,12 @@ function Step()
 		nLineNumber = -1;
 	}
 	
+	/* Save undo information */
+  if( nMaxUndo > 0 ) {
+    if( aUndoList.length >= nMaxUndo ) aUndoList.shift();  /* Discard oldest undo entry */
+    aUndoList.push({state: sState, position: nHeadPosition, symbol: sHeadSymbol});
+  }
+	
 	/* Update machine tape & state */
 	SetTapeSymbol( nHeadPosition, sNewSymbol );
 	sState = sNewState;
@@ -90,17 +100,35 @@ function Step()
 		if( oInstruction != null ) {
 			SetStatusMessage( "Halted." );
 		} 
-		EnableControls( false, false, false, true, true, true );
+		EnableControls( false, false, false, true, true, true, true );
 		return( false );
 	} else {
 		if( oInstruction.breakpoint ) {
 			SetStatusMessage( "Stopped at breakpoint on line " + (nLineNumber+1) );
-			EnableControls( true, true, false, true, true, true );
+			EnableControls( true, true, false, true, true, true, true );
 			return( false );
 		} else {
 			return( true );
 		}
 	}
+}
+
+/* Undo(): undo a single step of the machine */
+function Undo()
+{
+  var oUndoData = aUndoList.pop();
+  if( oUndoData ) {
+    nSteps--;
+    sState = oUndoData.state;
+    nHeadPosition = oUndoData.position;
+    SetTapeSymbol( nHeadPosition, oUndoData.symbol );
+    debug( 3, "Undone one step. New state: '" + sState + "' position : " + nHeadPosition + " symbol: '" + oUndoData.symbol + "'" );
+    EnableControls( true, true, false, true, true, true, true );
+    SetStatusMessage( "Undone one step." /*+ (aUndoList.length == 0 ? " No more undoes available." : " (" + aUndoList.length + " remaining)")*/ );
+    UpdateInterface();
+  } else {
+    debug( 1, "Warning: Tried to undo with no undo data available!" );
+  }
 }
 
 
@@ -169,7 +197,9 @@ function Reset()
 	oPrevInstruction = null;
 	oNextInstruction = GetNextInstruction( sState, GetTapeSymbol( nHeadPosition ) );
 	
-	EnableControls( true, true, false, true, true, true );
+	aUndoList = [];
+	
+	EnableControls( true, true, false, true, true, true, false );
 	UpdateInterface();
 }
 
@@ -416,12 +446,13 @@ function LoadMachineSnapshot( oObj )
 		$("#SpeedCheckbox")[0].checked = oObj.fullspeed;
 		bFullSpeed = oObj.fullspeed;
 	}
+	aUndoList = [];
 	if( sState.substring(0,4).toLowerCase() == "halt" ) {
 		SetStatusMessage( "Machine loaded. Halted." );
-		EnableControls( false, false, false, true, true, true );
+		EnableControls( false, false, false, true, true, true, true );
 	} else {
 		SetStatusMessage( "Machine loaded and ready" );
-		EnableControls( true, true, false, true, true, true );
+		EnableControls( true, true, false, true, true, true, true );
 	}
 	TextareaChanged();
 	Compile();
@@ -526,7 +557,7 @@ function ClearDebug()
 	$("#debug").empty();
 }
 
-function EnableControls( bStep, bRun, bStop, bReset, bSpeed, bTextarea )
+function EnableControls( bStep, bRun, bStop, bReset, bSpeed, bTextarea, bUndo )
 {
   document.getElementById( 'StepButton' ).disabled = !bStep;
   document.getElementById( 'RunButton' ).disabled = !bRun;
@@ -534,12 +565,19 @@ function EnableControls( bStep, bRun, bStop, bReset, bSpeed, bTextarea )
   document.getElementById( 'ResetButton' ).disabled = !bReset;
   document.getElementById( 'SpeedCheckbox' ).disabled = !bSpeed;
   document.getElementById( 'Source' ).disabled = !bTextarea;
-  
+  EnableUndoButton(bUndo);
   if( bSpeed ) {
     $( "#SpeedCheckboxLabel" ).removeClass( "disabled" );
   } else {
     $( "#SpeedCheckboxLabel" ).addClass( "disabled" );
   }
+//  debugger;
+//  debug( 3, "Enable Undo: " + !(bUndo && aUndoList.length > 0) );
+}
+
+function EnableUndoButton(bUndo)
+{
+  document.getElementById( 'UndoButton' ).disabled = !(bUndo && aUndoList.length > 0);
 }
 
 /* Trigger functions for the buttons */
@@ -548,6 +586,7 @@ function StepButton()
 {
 	SetStatusMessage( " " );
 	Step();
+	EnableUndoButton(true);
 }
 
 function RunButton()
@@ -555,7 +594,7 @@ function RunButton()
 	SetStatusMessage( "Running..." );
 	/* Make sure that the step interval is up-to-date */
 	SpeedCheckbox();
-	EnableControls( false, false, true, false, false, false );
+	EnableControls( false, false, true, false, false, false, false );
 	Run();
 }
 
@@ -563,7 +602,7 @@ function StopButton()
 {
 	if( hRunTimer != null ) {
 		SetStatusMessage( "Paused; click 'Run' or 'Step' to resume." );
-		EnableControls( true, true, false, true, true, true );
+		EnableControls( true, true, false, true, true, true, true );
 		StopTimer();
 	}
 }
@@ -572,7 +611,7 @@ function ResetButton()
 {
 	SetStatusMessage( "Machine reset. Click 'Run' or 'Step' to start." );
 	Reset();
-	EnableControls( true, true, false, true, true, true );
+	EnableControls( true, true, false, true, true, true, false );
 }
 
 function SpeedCheckbox()
@@ -864,9 +903,11 @@ function debug( n, str )
 {
 	if( n <= 0 ) {
 		SetStatusMessage( str );
+		console.log( str );
 	}
 	if( nDebugLevel >= n  ) {
 		$("#debug").append( document.createTextNode( str + "\n" ) );
+		console.log( str );
 	}
 }
 
