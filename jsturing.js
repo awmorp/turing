@@ -5,9 +5,9 @@
 /* Uses jquery (1.11.1) */
 
 /* TODO:
-     - user-specified start state: need to sanitize input
-     - user-specified start head position
+     - user-specified start head position?
      - factorial sample program ?
+     - undo steps?
 */
 
 
@@ -158,7 +158,7 @@ function Reset()
 	
 	/* Initialise state */
 	var sInitialState = $("#InitialState")[0].value;
-	sInitialState = $.trim( sInitialState ).split(" ")[0];
+	sInitialState = $.trim( sInitialState ).split(/\s+/)[0];
 	if( !sInitialState || sInitialState == "" ) sInitialState = "0";
 	sState = sInitialState;
 	
