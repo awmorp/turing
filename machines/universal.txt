@@ -1,3 +1,303 @@
-; Universal Turing machine
+; ----------------------------------------------------------------
+; A Universal Turing Machine
+; ----------------------------------------------------------------
+; For use with Turing machine simulator http://morphett.info/turing/turing.html.
+; ----------------------------------------------------------------
+; David Bevan
+; The Open University, England
+; April 2016
+; http://mathematics.open.ac.uk/people/david.bevan
+; ----------------------------------------------------------------
+; This UTM simulates 3-symbol Turing machines whose symbol set is {blank, 0, 1}.
+; ----------------------------------------------------------------
+; A specification of the input format can be found in the file utm.pdf 
+; in the Dropbox folder linked from http://tinyurl.com/M269resources.
+; ----------------------------------------------------------------
+; Example inputs:
+;   Binary parity bit
+;     [0L++, R., R+!1L+, R., R-:,,:]01011
+;   Binary increment
+;     [ L+,0R.,1R.!1L+,1L+,0L.:,0L.,1L.:]1011
+;   Unary subtraction
+;     [ L+,,1R.! L.,, R+: R.,, R+:,,1L--:]11111 11
+;   Binary palindrome detector
+;     [ R+++++++, R+, R++! L++,0R.,1R.: L++,0R.,1R.: R++++, L++, L+++++: R+++, L++++, L+: R++,0L+,1L+: R------,0L.,1L.:1L++,,:0L+, L., L.:,,:]1001
+; ----------------------------------------------------------------
 
-; Exercise: write it :)
+; initial state 0
+
+; 0: move to initial current cell
+0 ] ] r go
+0 * * r 0
+
+; go: execute transition rule
+go _ _ l getStateB
+go 0 0 l getState0
+go 1 1 l getState1
+
+; getState*: find current state (current cell is blank/0/1)
+getStateB ! ! l getTR3
+getStateB * * l getStateB
+getState0 ! ! l getTR2
+getState0 * * l getState0
+getState1 ! ! l markTR
+getState1 * * l getState1
+
+; getTR2/getTR3: find 2nd/3rd transition rule from right
+getTR2 , , l markTR
+getTR2 * * l getTR2
+getTR3 , , l getTR2
+getTR3 * * l getTR3
+
+; markTR: mark current transition rule (halt if no rule)
+markTR . # l markTR
+markTR - < l markTR
+markTR + > l markTR
+markTR L L l markTR
+markTR R R l markTR
+markTR _ _ r goWriteB
+markTR 0 0 r goWrite0
+markTR 1 1 r goWrite1
+markTR * * r halt
+
+; goWrite*: go and write blank/0/1 to current cell
+goWriteB ] ] r writeB
+goWriteB * * r goWriteB
+goWrite0 ] ] r write0
+goWrite0 * * r goWrite0
+goWrite1 ] ] r write1
+goWrite1 * * r goWrite1
+
+; write*: write blank/0/1 to current cell
+writeB * _ l getShift
+write0 * 0 l getShift
+write1 * 1 l getShift
+
+; getShift/getShift2: find current tape shift
+getShift # # l getShift2
+getShift < < l getShift2
+getShift > > l getShift2
+getShift * * l getShift 
+getShift2 L L r doShiftL
+getShift2 R R l doShiftR
+getShift2 * * l getShift2
+
+; doShiftL/shiftL*: shift left
+doShiftL ] _ l shiftLBra 
+doShiftL * * r doShiftL
+shiftLBra , ] l shiftLCom
+shiftLBra : ] l shiftLCol
+shiftLBra ! ] l shiftLExc
+shiftLCom . , l shiftLDot
+shiftLCom - , l shiftLMin
+shiftLCom + , l shiftLPlu
+shiftLCom # , l shiftLHas
+shiftLCom < , l shiftLLes
+shiftLCom > , l shiftLGre
+shiftLCom , , l shiftLCom
+shiftLCom : , l shiftLCol
+shiftLCom ! , l shiftLExc
+shiftLCom [ , l shiftLEnd
+shiftLCol . : l shiftLDot
+shiftLCol - : l shiftLMin
+shiftLCol + : l shiftLPlu
+shiftLCol # : l shiftLHas
+shiftLCol < : l shiftLLes
+shiftLCol > : l shiftLGre
+shiftLCol , : l shiftLCom
+shiftLCol : : l shiftLCol
+shiftLCol ! : l shiftLExc
+shiftLCol [ : l shiftLEnd
+shiftLExc . ! l shiftLDot
+shiftLExc - ! l shiftLMin
+shiftLExc + ! l shiftLPlu
+shiftLExc # ! l shiftLHas
+shiftLExc < ! l shiftLLes
+shiftLExc > ! l shiftLGre
+shiftLExc , ! l shiftLCom
+shiftLExc : ! l shiftLCol
+shiftLExc ! ! l shiftLExc
+shiftLExc [ ! l shiftLEnd
+shiftLDot L . l shiftLL
+shiftLDot R . l shiftLR
+shiftLHas L # l shiftLL
+shiftLHas R # l shiftLR
+shiftLMin - - l shiftLMin
+shiftLMin L - l shiftLL
+shiftLMin R - l shiftLR
+shiftLPlu + + l shiftLPlu
+shiftLPlu L + l shiftLL
+shiftLPlu R + l shiftLR
+shiftLLes < < l shiftLLes
+shiftLLes L < l shiftLL
+shiftLLes R < l shiftLR
+shiftLGre > > l shiftLGre
+shiftLGre L > l shiftLL
+shiftLGre R > l shiftLR
+shiftLL _ L l shiftLB
+shiftLL 0 L l shiftL0
+shiftLL 1 L l shiftL1
+shiftLR _ R l shiftLB
+shiftLR 0 R l shiftL0
+shiftLR 1 R l shiftL1
+shiftLB , _ l shiftLCom
+shiftLB : _ l shiftLCol
+shiftLB ! _ l shiftLExc
+shiftLB [ _ l shiftLEnd
+shiftL0 , 0 l shiftLCom
+shiftL0 : 0 l shiftLCol
+shiftL0 ! 0 l shiftLExc
+shiftL0 [ 0 l shiftLEnd
+shiftL1 , 1 l shiftLCom
+shiftL1 : 1 l shiftLCol
+shiftL1 ! 1 l shiftLExc
+shiftL1 [ 1 l shiftLEnd
+shiftLEnd _ [ r goWriteBb
+shiftLEnd 0 [ r goWrite0b
+shiftLEnd 1 [ r goWrite1b
+
+; goWrite*b: go and write blank/0/1 to current cell
+goWriteBb ] ] r writeBb
+goWriteBb * * r goWriteBb
+goWrite0b ] ] r write0b
+goWrite0b * * r goWrite0b
+goWrite1b ] ] r write1b
+goWrite1b * * r goWrite1b
+
+; write*b: write blank/0/1 to current cell
+writeBb * _ l changeState
+write0b * 0 l changeState
+write1b * 1 l changeState
+
+; doShiftR/shiftR*: shift right
+doShiftR ] ] r shiftR
+doShiftR * * r doShiftR
+shiftR _ _ l shiftRB
+shiftR 0 0 l shiftR0
+shiftR 1 1 l shiftR1
+shiftRB ] * r shiftRBBra
+shiftRBBra * ] l shiftRBStep
+shiftRB , * r shiftRBCom
+shiftRBCom * , l shiftRBStep
+shiftRB : * r shiftRBCol
+shiftRBCol * : l shiftRBStep
+shiftRB ! * r shiftRBExc
+shiftRBExc * ! l shiftRBStep
+shiftRB . * r shiftRBDot
+shiftRBDot * . l shiftRBStep
+shiftRB - * r shiftRBMin
+shiftRBMin * - l shiftRBStep
+shiftRB + * r shiftRBPlu
+shiftRBPlu * + l shiftRBStep
+shiftRB # * r shiftRBHas
+shiftRBHas * # l shiftRBStep
+shiftRB < * r shiftRBLes
+shiftRBLes * < l shiftRBStep
+shiftRB > * r shiftRBGre
+shiftRBGre * > l shiftRBStep
+shiftRB L * r shiftRBL
+shiftRBL * L l shiftRBStep
+shiftRB R * r shiftRBR
+shiftRBR * R l shiftRBStep
+shiftRB _ * r shiftRBB
+shiftRBB * _ l shiftRBStep
+shiftRB 0 * r shiftRB0
+shiftRB0 * 0 l shiftRBStep
+shiftRB 1 * r shiftRB1
+shiftRB1 * 1 l shiftRBStep
+shiftRB [ _ r shiftREnd
+shiftRBStep * * l shiftRB
+shiftR0 ] * r shiftR0Bra
+shiftR0Bra * ] l shiftR0Step
+shiftR0 , * r shiftR0Com
+shiftR0Com * , l shiftR0Step
+shiftR0 : * r shiftR0Col
+shiftR0Col * : l shiftR0Step
+shiftR0 ! * r shiftR0Exc
+shiftR0Exc * ! l shiftR0Step
+shiftR0 . * r shiftR0Dot
+shiftR0Dot * . l shiftR0Step
+shiftR0 - * r shiftR0Min
+shiftR0Min * - l shiftR0Step
+shiftR0 + * r shiftR0Plu
+shiftR0Plu * + l shiftR0Step
+shiftR0 # * r shiftR0Has
+shiftR0Has * # l shiftR0Step
+shiftR0 < * r shiftR0Les
+shiftR0Les * < l shiftR0Step
+shiftR0 > * r shiftR0Gre
+shiftR0Gre * > l shiftR0Step
+shiftR0 L * r shiftR0L
+shiftR0L * L l shiftR0Step
+shiftR0 R * r shiftR0R
+shiftR0R * R l shiftR0Step
+shiftR0 _ * r shiftR0B
+shiftR0B * _ l shiftR0Step
+shiftR0 0 * r shiftR00
+shiftR00 * 0 l shiftR0Step
+shiftR0 1 * r shiftR01
+shiftR01 * 1 l shiftR0Step
+shiftR0 [ 0 r shiftREnd
+shiftR0Step * * l shiftR0
+shiftR1 ] * r shiftR1Bra
+shiftR1Bra * ] l shiftR1Step
+shiftR1 , * r shiftR1Com
+shiftR1Com * , l shiftR1Step
+shiftR1 : * r shiftR1Col
+shiftR1Col * : l shiftR1Step
+shiftR1 ! * r shiftR1Exc
+shiftR1Exc * ! l shiftR1Step
+shiftR1 . * r shiftR1Dot
+shiftR1Dot * . l shiftR1Step
+shiftR1 - * r shiftR1Min
+shiftR1Min * - l shiftR1Step
+shiftR1 + * r shiftR1Plu
+shiftR1Plu * + l shiftR1Step
+shiftR1 # * r shiftR1Has
+shiftR1Has * # l shiftR1Step
+shiftR1 < * r shiftR1Les
+shiftR1Les * < l shiftR1Step
+shiftR1 > * r shiftR1Gre
+shiftR1Gre * > l shiftR1Step
+shiftR1 L * r shiftR1L
+shiftR1L * L l shiftR1Step
+shiftR1 R * r shiftR1R
+shiftR1R * R l shiftR1Step
+shiftR1 _ * r shiftR1B
+shiftR1B * _ l shiftR1Step
+shiftR1 0 * r shiftR10
+shiftR10 * 0 l shiftR1Step
+shiftR1 1 * r shiftR11
+shiftR11 * 1 l shiftR1Step
+shiftR1 [ 1 r shiftREnd
+shiftR1Step * * l shiftR1
+shiftREnd * [ r changeStateR
+
+; changeState*: change to new state (when done, restart)
+changeState # . r 0
+changeState [ [ r 0
+changeState < - r downState
+changeState > + r upState
+changeState * * l changeState
+changeStateR # . r 0
+changeStateR < - r downState
+changeStateR > + r upState
+changeStateR * * r changeStateR
+
+; upState/upState2: increment state
+upState ! : r upState2
+upState * * r upState
+upState2 : ! l changeState
+upState2 * * r upState2
+
+; downState*: decrement state (when done, restart)
+downState ! : l downState2
+downState * * r downState
+downState2 : ! r downStateR
+downState2 * * l downState2
+downStateR < - l downStateL
+downStateR ] ] r go
+downStateR * * r downStateR
+downStateL ! : l downState2
+downStateL * * l downStateL
+
