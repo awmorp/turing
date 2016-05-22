@@ -50,7 +50,7 @@
     <div class="BoxTitle">Tape</div>
     <div id="MachineTape" class="MachineStatusBox" title="This is the Turing machine's tape. The head position is indicated by the highlighted cell and arrow.">
      <!-- the following pre elements must be on a single line with no whitespace between them !-->
-     <div id="RunningTapeDisplay"><pre id="LeftTape" class="tape"></pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"> </pre><div id="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"></pre></div>
+     <div id="RunningTapeDisplay"><div id="TapeValues"><pre id="LeftTape" class="tape"></pre><div id="ActiveTapeArea"><pre id="ActiveTape" class="tape"> </pre><div id="MachineHead"><div class="HeadTop"></div><div class="HeadBody">Head</div></div></div><pre id="RightTape" class="tape"></pre></div></div>
     </div> <!-- div MachineTape !-->
    </div>
 
@@ -114,9 +114,23 @@
        <div id="InitialTapeDisplay"  title="This initial data will be loaded on the tape when the machine starts">
         Initial input:<input type="text" id="InitialInput" value="">
        </div>
-       <div id="InitialStateDisplay"  title="This is the state that the machine will start in">
-        Initial state:<input type="text" id="InitialState" value="0">
+       <div style="font-size: small;">
+        <a href="javascript:" onclick="$('#AdvancedOptions').slideToggle();" title="Show advanced machine options">Advanced options</a>
        </div>
+       <div id="AdvancedOptions" style="display: none; margin-top: 0.25em;">
+        <div id="InitialStateDisplay"  title="This is the state that the machine will start in" style="margin-bottom: 0.5em;">
+         Initial state:<input type="text" id="InitialState" value="0">
+        </div>
+        <div title="Choose between different Turing machine variants">
+         Machine variant:
+         <select onchange="VariantChanged();" id="MachineVariant">
+          <option value="0" selected="selected">Standard</option>
+          <option value="1">Semi-infinite tape</option>
+         </select>
+         <div id="MachineVariantDescription" style="font-size: small; font-style: italic;"></div>
+         <span style="font-size: x-small;"><a href="javascript:" onclick="$('#AdvancedOptions').hide();">[Close]</a></span>
+        </div>
+       </div> 
        <br>
        <br>
        <div id="LoadBlock">

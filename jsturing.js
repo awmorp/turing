@@ -21,6 +21,7 @@ var nTapeOffset = 0;		/* the logical position on TM tape of the first character 
 var nHeadPosition = 0;		/* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
 var sState = "0";
 var nSteps = 0;
+var nVariant = 0; /* Machine variant. 0 = standard infinite tape, 1 = tape infinite in one direction only */
 var hRunTimer = null;
 var aProgram = new Object();
 /* aProgram is a double asociative array, indexed first by state then by symbol.
@@ -68,6 +69,9 @@ function Step()
 		sNewState = (oInstruction.newState == "*" ? sState : oInstruction.newState);
 		sNewSymbol = (oInstruction.newSymbol == "*" ? sHeadSymbol : oInstruction.newSymbol);
 		nAction = (oInstruction.action.toLowerCase() == "r" ? 1 : (oInstruction.action.toLowerCase() == "l" ? -1 : 0));
+    if( nVariant == 1 && nHeadPosition == 0 && nAction == -1 ) {
+      nAction = 0;  /* Can't move left when already at left-most tape cell. */
+    }
 		nLineNumber = oInstruction.sourceLineNumber;
 	} else {
 		/* No matching rule found; halt */
@@ -193,6 +197,11 @@ function Reset()
 	sInitialState = $.trim( sInitialState ).split(/\s+/)[0];
 	if( !sInitialState || sInitialState == "" ) sInitialState = "0";
 	sState = sInitialState;
+	
+	/* Initialise variant */
+  var dropdown = $("#MachineVariant")[0];
+  nVariant = Number(dropdown.options[dropdown.selectedIndex].value);
+  SetupVariantCSS();
 	
 	nSteps = 0;
 	bIsReset = true;
@@ -426,6 +435,7 @@ function SaveMachineSnapshot()
 		"initialtape": $("#InitialInput")[0].value,
 		"initialstate": $("#InitialState")[0].value,
 		"fullspeed": bFullSpeed,
+		"variant": nVariant,
 		"version": 1		/* Internal version number */
 	});
 }
@@ -450,6 +460,14 @@ function LoadMachineSnapshot( oObj )
 		$("#SpeedCheckbox")[0].checked = oObj.fullspeed;
 		bFullSpeed = oObj.fullspeed;
 	}
+	if( oObj.variant ) {
+	  nVariant = oObj.variant;
+	} else {
+    nVariant = 0;
+	}
+	$("#MachineVariant").val(nVariant);
+	VariantChanged();
+	SetupVariantCSS();
 	aUndoList = [];
 	if( sState.substring(0,4).toLowerCase() == "halt" ) {
 		SetStatusMessage( "Machine loaded. Halted.", 1 );
@@ -629,6 +647,26 @@ function SpeedCheckbox()
   bFullSpeed = $( '#SpeedCheckbox' )[0].checked;
 }
 
+function VariantChanged()
+{
+  var dropdown = $("#MachineVariant")[0];
+  selected = Number(dropdown.options[dropdown.selectedIndex].value);
+  var descriptions = {
+    0: "Standard Turing machine with tape infinite in both directions",
+    1: "Turing machine with tape infinite in one direction only (as used in, eg, <a href='http://math.mit.edu/~sipser/book.html'>Sipser</a>)"
+  };
+  $("#MachineVariantDescription").html( descriptions[selected] );
+}
+
+function SetupVariantCSS()
+{
+  if( nVariant == 1 ) {
+    $("#LeftTape").addClass( "OneDirectionalTape" );
+  } else {
+    $("#LeftTape").removeClass( "OneDirectionalTape" );
+  }
+}
+
 function LoadFromCloud( sID )
 {
 	/* Get data from github */
@@ -752,6 +790,10 @@ function LoadSampleProgram( zName, zFriendlyName, bInitial )
 				sData = sData.replace( /^.*\$INITIAL_TAPE:.*$/m, "" );
 			}
 			$("#InitialState")[0].value = "0";
+			nVariant = 0;
+			$("#MachineVariant").val(0);
+			VariantChanged();
+			/* TODO: Set up CSS */
 
 			/* Load the program */
 			oTextarea.value = sData;
@@ -878,6 +920,8 @@ function OnLoad()
 
 	oTextarea = $("#Source")[0];
 	TextareaChanged();
+	
+	VariantChanged(); /* Set up variant description */
 	
 	if( window.location.search != "" ) {
 		SetStatusMessage( "Loading saved machine..." );

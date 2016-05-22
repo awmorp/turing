@@ -67,14 +67,18 @@ body {
   margin: 0;
 }
 
+.OneDirectionalTape {
+  border-left: 3px solid red;
+}
+
 #LeftTape {
   text-align: right;
-  padding-left: 10px;
+  padding-left: 5px;
 }
 
 #RightTape {
   text-align: left;
-  padding-right: 10px;
+  padding-right: 5px;
 }
 
 #ActiveTape {
