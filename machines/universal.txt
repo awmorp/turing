@@ -301,3 +301,4 @@ downStateR * * r downStateR
 downStateL ! : l downState2
 downStateL * * l downStateL
 
+;$INITIAL_TAPE:[ L+,0R.,1R.!1L+,1L+,0L.:,0L.,1L.:]1011
