@@ -1,13 +1,14 @@
-/* JavaScript Turing machine emulator */
-/* Anthony Morphett - awmorp@gmail.com */
+/* JavaScript Turing machine emulator
+ * Anthony Morphett - awmorp@gmail.com
+ *
+ * With contributions from Erez Wanderman
+ */
 
 /* Version 2.0 - January 2015 */
 /* Uses jquery (1.11.1) */
 
 /* TODO:
-     - user-specified start head position?
      - factorial sample program ?
-     - undo steps?
 */
 
 
