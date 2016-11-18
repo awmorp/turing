@@ -217,6 +217,20 @@ function Reset()
 	UpdateInterface();
 }
 
+function createTuringInstructionFromTuple(tuple, line){
+	return {
+		newSymbol: oTuple.newSymbol,
+		action: oTuple.action,
+		newState: oTuple.newState,
+		sourceLineNumber: line,
+		breakpoint: oTuple.breakpoint
+	};
+}
+
+function isArray(possiblyArr){
+	Object.prototype.toString.call(possiblyArr) === "[object Array]";
+}
+
 /* Compile(): parse the inputted program and store it in aProgram */
 function Compile()
 {
@@ -240,19 +254,15 @@ function Compile()
 			debug( 5, " Parsed tuple: '" + oTuple.currentState + "'  '" + oTuple.currentSymbol + "'  '" + oTuple.newSymbol + "'  '" + oTuple.action + "'  '" + oTuple.newState + "'" );
 			if( aProgram[oTuple.currentState] == null ) aProgram[oTuple.currentState] = new Object;
 			if( aProgram[oTuple.currentState][oTuple.currentSymbol] != null ) {
-				debug( 1, "Warning: multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber+1) + " and " + (i+1) );
-				SetSyntaxMessage( "Warning: Multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber+1) + " and " + (i+1) );
-				SetErrorLine( i );
-				SetErrorLine( aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber );
-				
-				
+				var currentTuringInstruction = aProgram[oTuple.currentState][oTuple.currentSymbol];
+				if (!isArray(currentTuringInstruction)){
+					aProgram[oTuple.currentState][oTuple.currentSymbol] = [currentTuringInstruction];
+					currentTuringInstruction = aProgram[oTuple.currentState][oTuple.currentSymbol];
+				}
+				currentTuringInstruction.push(createTuringInstructionFromTuple(oTuple, i));
+			} else {
+				aProgram[oTuple.currentState][oTuple.currentSymbol] = createTuringInstructionFromTuple(oTuple, i);
 			}
-			aProgram[oTuple.currentState][oTuple.currentSymbol] = new Object;
-			aProgram[oTuple.currentState][oTuple.currentSymbol].newSymbol = oTuple.newSymbol;
-			aProgram[oTuple.currentState][oTuple.currentSymbol].action = oTuple.action;
-			aProgram[oTuple.currentState][oTuple.currentSymbol].newState = oTuple.newState;
-			aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber = i;
-			aProgram[oTuple.currentState][oTuple.currentSymbol].breakpoint = oTuple.breakpoint;
 		}
 		else if( oTuple.error )
 		{
@@ -374,7 +384,15 @@ function ParseLine( sLine, nLineNum )
 }
 
 /* GetNextInstruction(): look up the next instruction for the given state and symbol */
-function GetNextInstruction(sState, sHeadSymbol)
+function GetNextInstruction(sState, sHeadSymbol){
+	var instructions = GetAllNextInstructions(sState, sHeadSymbol);
+	if (isArray(instructions)){
+        	return instructions[Math.floor(Math.random()*instruction.length)];
+	}
+	return instructions;
+}
+
+function GetAllNextInstructions(sState, sHeadSymbol)
 {
 	if( aProgram[sState] != null && aProgram[sState][sHeadSymbol] != null ) {
 		/* Use instruction specifically corresponding to current state & symbol, if any */
