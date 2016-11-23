@@ -12,7 +12,7 @@
 */
 
 
-var nDebugLevel = 0;
+var nDebugLevel = 6;
 
 var bFullSpeed = false;	/* If true, run at full speed with no delay between steps */
 
@@ -22,7 +22,7 @@ var nTapeOffset = 0;		/* the logical position on TM tape of the first character 
 var nHeadPosition = 0;		/* the position of the TM's head on its tape. Initially zero; may be negative if TM moves to left */
 var sState = "0";
 var nSteps = 0;
-var nVariant = 0; /* Machine variant. 0 = standard infinite tape, 1 = tape infinite in one direction only */
+var nVariant = 0; /* Machine variant. 0 = standard infinite tape, 1 = tape infinite in one direction only, 2 = non-deterministic TM */
 var hRunTimer = null;
 var aProgram = new Object();
 /* aProgram is a double asociative array, indexed first by state then by symbol.
@@ -217,17 +217,19 @@ function Reset()
 	UpdateInterface();
 }
 
-function createTuringInstructionFromTuple(tuple, line){
+function createTuringInstructionFromTuple( tuple, line )
+{
 	return {
-		newSymbol: oTuple.newSymbol,
-		action: oTuple.action,
-		newState: oTuple.newState,
+		newSymbol: tuple.newSymbol,
+		action: tuple.action,
+		newState: tuple.newState,
 		sourceLineNumber: line,
-		breakpoint: oTuple.breakpoint
+		breakpoint: tuple.breakpoint
 	};
 }
 
-function isArray(possiblyArr){
+function isArray( possiblyArr )
+{
 	Object.prototype.toString.call(possiblyArr) === "[object Array]";
 }
 
@@ -252,16 +254,24 @@ function Compile()
 		var oTuple = ParseLine( aLines[i], i );
 		if( oTuple.isValid ) {
 			debug( 5, " Parsed tuple: '" + oTuple.currentState + "'  '" + oTuple.currentSymbol + "'  '" + oTuple.newSymbol + "'  '" + oTuple.action + "'  '" + oTuple.newState + "'" );
+//			debugger;
 			if( aProgram[oTuple.currentState] == null ) aProgram[oTuple.currentState] = new Object;
 			if( aProgram[oTuple.currentState][oTuple.currentSymbol] != null ) {
-				var currentTuringInstruction = aProgram[oTuple.currentState][oTuple.currentSymbol];
-				if (!isArray(currentTuringInstruction)){
-					aProgram[oTuple.currentState][oTuple.currentSymbol] = [currentTuringInstruction];
-					currentTuringInstruction = aProgram[oTuple.currentState][oTuple.currentSymbol];
-				}
-				currentTuringInstruction.push(createTuringInstructionFromTuple(oTuple, i));
+        if( nVariant == 2 ) { /* Non-deterministic machine */
+          var currentTuringInstruction = aProgram[oTuple.currentState][oTuple.currentSymbol];
+          if( !isArray(currentTuringInstruction) ) {
+            aProgram[oTuple.currentState][oTuple.currentSymbol] = [currentTuringInstruction];
+          }
+          aProgram[oTuple.currentState][oTuple.currentSymbol].push( createTuringInstructionFromTuple( oTuple, i ) );
+        } else {
+          debug( 1, "Warning: multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber+1) + " and " + (i+1) );
+          SetSyntaxMessage( "Warning: Multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber+1) + " and " + (i+1) );
+          SetErrorLine( i );
+          SetErrorLine( aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber );
+          aProgram[oTuple.currentState][oTuple.currentSymbol] = createTuringInstructionFromTuple( oTuple, i );
+        }
 			} else {
-				aProgram[oTuple.currentState][oTuple.currentSymbol] = createTuringInstructionFromTuple(oTuple, i);
+				aProgram[oTuple.currentState][oTuple.currentSymbol] = createTuringInstructionFromTuple( oTuple, i );
 			}
 		}
 		else if( oTuple.error )
@@ -384,15 +394,17 @@ function ParseLine( sLine, nLineNum )
 }
 
 /* GetNextInstruction(): look up the next instruction for the given state and symbol */
-function GetNextInstruction(sState, sHeadSymbol){
-	var instructions = GetAllNextInstructions(sState, sHeadSymbol);
-	if (isArray(instructions)){
-        	return instructions[Math.floor(Math.random()*instruction.length)];
-	}
-	return instructions;
+function GetNextInstruction( sState, sHeadSymbol )
+{
+	var instructions = GetAllNextInstructions( sState, sHeadSymbol );
+	if( isArray(instructions) ) {
+        	return( instructions[Math.floor(Math.random()*instruction.length)] );
+	} else {
+    return( instructions );
+  }
 }
 
-function GetAllNextInstructions(sState, sHeadSymbol)
+function GetAllNextInstructions( sState, sHeadSymbol )
 {
 	if( aProgram[sState] != null && aProgram[sState][sHeadSymbol] != null ) {
 		/* Use instruction specifically corresponding to current state & symbol, if any */
@@ -669,10 +681,11 @@ function SpeedCheckbox()
 function VariantChanged()
 {
   var dropdown = $("#MachineVariant")[0];
-  selected = Number(dropdown.options[dropdown.selectedIndex].value);
+  var selected = Number(dropdown.options[dropdown.selectedIndex].value);
   var descriptions = {
     0: "Standard Turing machine with tape infinite in both directions",
-    1: "Turing machine with tape infinite in one direction only (as used in, eg, <a href='http://math.mit.edu/~sipser/book.html'>Sipser</a>)"
+    1: "Turing machine with tape infinite in one direction only (as used in, eg, <a href='http://math.mit.edu/~sipser/book.html'>Sipser</a>)",
+    2: "Non-deterministic Turing machine which allows multiple rules for the same state and symbol pair, and chooses one at random"
   };
   $("#MachineVariantDescription").html( descriptions[selected] );
 }
