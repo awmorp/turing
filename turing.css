@@ -360,6 +360,11 @@ code {
   z-index: 1;
 }
 
+#ResetMessage {
+  color: red;
+  display: none;
+}
+
 ul {
   margin-top: 0;
   margin-bottom: 0;

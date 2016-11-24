@@ -1,7 +1,7 @@
 /* JavaScript Turing machine emulator
  * Anthony Morphett - awmorp@gmail.com
  *
- * With contributions from Erez Wanderman
+ * With contributions from Erez Wanderman and Etai Gross
  */
 
 /* Version 2.0 - January 2015 */
@@ -12,7 +12,7 @@
 */
 
 
-var nDebugLevel = 6;
+var nDebugLevel = 0;
 
 var bFullSpeed = false;	/* If true, run at full speed with no delay between steps */
 
@@ -26,7 +26,7 @@ var nVariant = 0; /* Machine variant. 0 = standard infinite tape, 1 = tape infin
 var hRunTimer = null;
 var aProgram = new Object();
 /* aProgram is a double asociative array, indexed first by state then by symbol.
-   Its members are objects with properties newSymbol, action, newState, breakpoint and sourceLineNumber.
+   Its members are arrays of objects with properties newSymbol, action, newState, breakpoint and sourceLineNumber.
 */
 
 var nMaxUndo = 10;  /* Maximum number of undo steps */
@@ -37,10 +37,9 @@ var aUndoList = [];
 var nTextareaLines = -1;
 var oTextarea;
 var bIsDirty = true;	/* If true, source must be recompiled before running machine */
-var oNextLineMarker = $("<div id='NextLineMarker'>Next<div id='NextLineMarkerEnd'></div></div>");
-var oPrevLineMarker = $("<div id='PrevLineMarker'>Prev<div id='PrevLineMarkerEnd'></div></div>");
+var oNextLineMarker = $("<div class='NextLineMarker'>Next<div class='NextLineMarkerEnd'></div></div>");
+var oPrevLineMarker = $("<div class='PrevLineMarker'>Prev<div class='PrevLineMarkerEnd'></div></div>");
 var oPrevInstruction = null;
-var oNextInstruction = null;
 
 var sPreviousStatusMsg = "";  /* Most recent status message, for flashing alerts */
 
@@ -64,7 +63,18 @@ function Step()
 	var sHeadSymbol = GetTapeSymbol( nHeadPosition );
 	
 	/* Find appropriate TM instruction */
-	var oInstruction = GetNextInstruction( sState, sHeadSymbol );
+	var aInstructions = GetNextInstructions( sState, sHeadSymbol );
+	var oInstruction;
+	if( aInstructions.length == 0 ) {
+    // No matching instruction found. Error handled below.
+    oInstruction = null;
+	} else if( nVariant == 2 ) {
+    // Non-deterministic TM. Choose an instruction at random.
+    oInstruction = aInstructions[Math.floor(Math.random()*aInstructions.length)];
+	} else {
+    // Deterministic TM. Choose the first (and only) instruction.
+    oInstruction = aInstructions[0];
+	}
 	
 	if( oInstruction != null ) {
 		sNewState = (oInstruction.newState == "*" ? sState : oInstruction.newState);
@@ -98,7 +108,6 @@ function Step()
 	nSteps++;
 	
 	oPrevInstruction = oInstruction;
-	oNextInstruction = GetNextInstruction( sNewState, GetTapeSymbol( nHeadPosition ) );
 	
 	debug( 4, "Step() finished. New tape: '" + sTape + "'  new state: '" + sState + "'  action: " + nAction + "  line number: " + nLineNumber  );
 	UpdateInterface();
@@ -130,7 +139,6 @@ function Undo()
     nHeadPosition = oUndoData.position;
     SetTapeSymbol( nHeadPosition, oUndoData.symbol );
     oPrevInstruction = null;
-    oNextInstruction = GetNextInstruction( sState, oUndoData.symbol );
     debug( 3, "Undone one step. New state: '" + sState + "' position : " + nHeadPosition + " symbol: '" + oUndoData.symbol + "'" );
     EnableControls( true, true, false, true, true, true, true );
     SetStatusMessage( "Undone one step." /*+ (aUndoList.length == 0 ? " No more undoes available." : " (" + aUndoList.length + " remaining)")*/ );
@@ -209,10 +217,10 @@ function Reset()
 	
 	Compile();
 	oPrevInstruction = null;
-	oNextInstruction = GetNextInstruction( sState, GetTapeSymbol( nHeadPosition ) );
 	
 	aUndoList = [];
 	
+	ShowResetMsg(false);
 	EnableControls( true, true, false, true, true, true, false );
 	UpdateInterface();
 }
@@ -254,25 +262,20 @@ function Compile()
 		var oTuple = ParseLine( aLines[i], i );
 		if( oTuple.isValid ) {
 			debug( 5, " Parsed tuple: '" + oTuple.currentState + "'  '" + oTuple.currentSymbol + "'  '" + oTuple.newSymbol + "'  '" + oTuple.action + "'  '" + oTuple.newState + "'" );
-//			debugger;
 			if( aProgram[oTuple.currentState] == null ) aProgram[oTuple.currentState] = new Object;
-			if( aProgram[oTuple.currentState][oTuple.currentSymbol] != null ) {
-        if( nVariant == 2 ) { /* Non-deterministic machine */
-          var currentTuringInstruction = aProgram[oTuple.currentState][oTuple.currentSymbol];
-          if( !isArray(currentTuringInstruction) ) {
-            aProgram[oTuple.currentState][oTuple.currentSymbol] = [currentTuringInstruction];
-          }
-          aProgram[oTuple.currentState][oTuple.currentSymbol].push( createTuringInstructionFromTuple( oTuple, i ) );
-        } else {
-          debug( 1, "Warning: multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber+1) + " and " + (i+1) );
-          SetSyntaxMessage( "Warning: Multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber+1) + " and " + (i+1) );
-          SetErrorLine( i );
-          SetErrorLine( aProgram[oTuple.currentState][oTuple.currentSymbol].sourceLineNumber );
-          aProgram[oTuple.currentState][oTuple.currentSymbol] = createTuringInstructionFromTuple( oTuple, i );
-        }
-			} else {
-				aProgram[oTuple.currentState][oTuple.currentSymbol] = createTuringInstructionFromTuple( oTuple, i );
+			if( aProgram[oTuple.currentState][oTuple.currentSymbol] == null ) {
+        aProgram[oTuple.currentState][oTuple.currentSymbol] = [];
 			}
+			if( aProgram[oTuple.currentState][oTuple.currentSymbol].length > 0 && nVariant != 2 ) {
+        // Multiple conflicting instructions found.
+        debug( 1, "Warning: multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol][0].sourceLineNumber+1) + " and " + (i+1) );
+        SetSyntaxMessage( "Warning: Multiple definitions for state '" + oTuple.currentState + "' symbol '" + oTuple.currentSymbol + "' on lines " + (aProgram[oTuple.currentState][oTuple.currentSymbol][0].sourceLineNumber+1) + " and " + (i+1) );
+        SetErrorLine( i );
+        SetErrorLine( aProgram[oTuple.currentState][oTuple.currentSymbol][0].sourceLineNumber );
+        aProgram[oTuple.currentState][oTuple.currentSymbol][0] = createTuringInstructionFromTuple( oTuple, i );
+			} else {
+        aProgram[oTuple.currentState][oTuple.currentSymbol].push( createTuringInstructionFromTuple( oTuple, i ) );
+      }
 		}
 		else if( oTuple.error )
 		{
@@ -297,7 +300,6 @@ function Compile()
 	
 	/* Lines have changed. Previous line is no longer meaningful, recalculate next line. */
 	oPrevInstruction = null;
-	oNextInstruction = GetNextInstruction( sState, GetTapeSymbol( nHeadPosition ) );
 	
 	bIsDirty = false;
 	
@@ -393,32 +395,26 @@ function ParseLine( sLine, nLineNum )
 	return( oTuple );
 }
 
-/* GetNextInstruction(): look up the next instruction for the given state and symbol */
-function GetNextInstruction( sState, sHeadSymbol )
+// Get all applicable instructions for the given state and symbol.
+// Returns an array of instructions, to support non-deterministic machines.
+function GetNextInstructions( sState, sHeadSymbol )
 {
-	var instructions = GetAllNextInstructions( sState, sHeadSymbol );
-	if( isArray(instructions) ) {
-        	return( instructions[Math.floor(Math.random()*instruction.length)] );
-	} else {
-    return( instructions );
-  }
-}
-
-function GetAllNextInstructions( sState, sHeadSymbol )
-{
+  var result = null;
 	if( aProgram[sState] != null && aProgram[sState][sHeadSymbol] != null ) {
-		/* Use instruction specifically corresponding to current state & symbol, if any */
+		/* Use instructions specifically corresponding to current state & symbol, if any */
 		return( aProgram[sState][sHeadSymbol] );
 	} else if( aProgram[sState] != null && aProgram[sState]["*"] != null ) {
-		/* Next use rule for the current state and default symbol, if any */
+		/* Next use rules for the current state and default symbol, if any */
 		return( aProgram[sState]["*"] );
 	} else if( aProgram["*"] != null && aProgram["*"][sHeadSymbol] != null ) {
-		/* Next use rule for default state and current symbol, if any */
+		/* Next use rules for default state and current symbol, if any */
 		return( aProgram["*"][sHeadSymbol] );
 	} else if( aProgram["*"] != null && aProgram["*"]["*"] != null ) {
-		/* Finally use rule for default state and default symbol */
+		/* Finally use rules for default state and default symbol */
 		return( aProgram["*"]["*"] );
-	} else return( null );
+	} else {
+    return( [] );
+  }
 }
 
 /* GetTapeSymbol( n ): returns the symbol at cell n of the TM tape */
@@ -497,7 +493,7 @@ function LoadMachineSnapshot( oObj )
     nVariant = 0;
 	}
 	$("#MachineVariant").val(nVariant);
-	VariantChanged();
+	VariantChanged(false);
 	SetupVariantCSS();
 	aUndoList = [];
 	if( sState.substring(0,4).toLowerCase() == "halt" ) {
@@ -600,8 +596,9 @@ function RenderSteps()
 
 function RenderLineMarkers()
 {
-	debug( 3, "Rendering line markers: " + (oNextInstruction?oNextInstruction.sourceLineNumber:-1) + " " + (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
-	SetActiveLines( (oNextInstruction?oNextInstruction.sourceLineNumber:-1), (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
+  var oNextList = $.map(GetNextInstructions( sState, GetTapeSymbol( nHeadPosition ) ), function(x){return(x.sourceLineNumber);} );
+	debug( 3, "Rendering line markers: " + (oNextList) + " " + (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
+	SetActiveLines( oNextList, (oPrevInstruction?oPrevInstruction.sourceLineNumber:-1) );
 }
 
 /* UpdateInterface(): refresh the tape, state and steps displayed on the page */
@@ -678,7 +675,7 @@ function SpeedCheckbox()
   bFullSpeed = $( '#SpeedCheckbox' )[0].checked;
 }
 
-function VariantChanged()
+function VariantChanged(needWarning)
 {
   var dropdown = $("#MachineVariant")[0];
   var selected = Number(dropdown.options[dropdown.selectedIndex].value);
@@ -688,6 +685,7 @@ function VariantChanged()
     2: "Non-deterministic Turing machine which allows multiple rules for the same state and symbol pair, and chooses one at random"
   };
   $("#MachineVariantDescription").html( descriptions[selected] );
+  if( needWarning ) ShowResetMsg(true);
 }
 
 function SetupVariantCSS()
@@ -697,6 +695,12 @@ function SetupVariantCSS()
   } else {
     $("#LeftTape").removeClass( "OneDirectionalTape" );
   }
+}
+
+function ShowResetMsg(b)
+{
+  if( b ) $("#ResetMessage").fadeIn();
+  else $("#ResetMessage").hide();
 }
 
 function LoadFromCloud( sID )
@@ -824,7 +828,7 @@ function LoadSampleProgram( zName, zFriendlyName, bInitial )
 			$("#InitialState")[0].value = "0";
 			nVariant = 0;
 			$("#MachineVariant").val(0);
-			VariantChanged();
+			VariantChanged(false);
 			/* TODO: Set up CSS */
 
 			/* Load the program */
@@ -859,7 +863,6 @@ function TextareaChanged()
 //	Compile();
 	bIsDirty = true;
 	oPrevInstruction = null;
-	oNextInstruction = null;
 	RenderLineMarkers();
 }
 
@@ -884,27 +887,33 @@ function UpdateTextareaDecorations()
 }
 
 /* Highlight given lines as the next/previous tuple */
+/* next is a list of lines (to support nondeterministic TM), prev is a number */
 function SetActiveLines( next, prev )
 {
 	$(".talinebgnext").removeClass('talinebgnext');
-	oNextLineMarker.detach().removeClass('shifted');
+	$(".NextLineMarker").remove();
 	$(".talinebgprev").removeClass('talinebgprev');
-	oPrevLineMarker.detach().removeClass('shifted');
+	$(".PrevLineMarker").remove();
 	
-	if( next >= 0 )
+  var shift = false;
+	for( var i = 0; i < next.length; i++ )
 	{
-		$("#talinebg"+(next+1)).addClass('talinebgnext').prepend(oNextLineMarker);
+    var oMarker = $("<div class='NextLineMarker'>Next<div class='NextLineMarkerEnd'></div></div>");
+    $("#talinebg"+(next[i]+1)).addClass('talinebgnext').prepend(oMarker);
+    if( next[i] == prev ) {
+      oMarker.addClass('shifted');
+      shift = true;
+    }
 	}
-	if( prev >= 0)
+	if( prev >= 0 )
 	{
-		if( prev != next ) {
-			$("#talinebg"+(prev+1)).addClass('talinebgprev').prepend(oPrevLineMarker);
-		} else {
-			$("#talinebg"+(prev+1)).prepend(oPrevLineMarker);
-			oNextLineMarker.addClass('shifted');
-			oPrevLineMarker.addClass('shifted');
-			
-		}
+    var oMarker = $("<div class='PrevLineMarker'>Prev<div class='PrevLineMarkerEnd'></div></div>");
+    if( shift ) {
+      $("#talinebg"+(prev+1)).prepend(oMarker);
+      oMarker.addClass('shifted');
+    } else {
+      $("#talinebg"+(prev+1)).addClass('talinebgprev').prepend(oMarker);
+    }
 	}
 }
 
@@ -953,7 +962,7 @@ function OnLoad()
 	oTextarea = $("#Source")[0];
 	TextareaChanged();
 	
-	VariantChanged(); /* Set up variant description */
+	VariantChanged(false); /* Set up variant description */
 	
 	if( window.location.search != "" ) {
 		SetStatusMessage( "Loading saved machine..." );

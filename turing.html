@@ -112,18 +112,18 @@
        <button id="StepButton" onclick="StepButton();" title="Run the machine for a single step and the pause">Step</button><br> <!-- &#x25b8;&#x2759; !-->
        <button id="ResetButton" onclick="ResetButton();" title="Reset the machine and tape to the initial state">Reset</button> <!-- &#x2759;&#x23ea; !-->
        <div id="InitialTapeDisplay"  title="This initial data will be loaded on the tape when the machine starts">
-        Initial input:<input type="text" id="InitialInput" value="">
+        Initial input:<input type="text" id="InitialInput" value="" onchange="ShowResetMsg(true);">
        </div>
        <div style="font-size: small;">
         <a href="javascript:" onclick="$('#AdvancedOptions').slideToggle();" title="Show advanced machine options">Advanced options</a>
        </div>
        <div id="AdvancedOptions" style="display: none; margin-top: 0.25em;">
         <div id="InitialStateDisplay"  title="This is the state that the machine will start in" style="margin-bottom: 0.5em;">
-         Initial state:<input type="text" id="InitialState" value="0">
+         Initial state:<input type="text" id="InitialState" value="0" onchange="ShowResetMsg(true);">
         </div>
         <div title="Choose between different Turing machine variants">
          Machine variant:
-         <select onchange="VariantChanged();" id="MachineVariant">
+         <select onchange="VariantChanged(true);" id="MachineVariant">
           <option value="0" selected="selected">Standard</option>
           <option value="1">Semi-infinite tape</option>
           <option value="2">Non-deterministic</option>
@@ -132,6 +132,7 @@
          <span style="font-size: x-small;"><a href="javascript:" onclick="$('#AdvancedOptions').hide();">[Close]</a></span>
         </div>
        </div> 
+       <div id="ResetMessage">Changes will take effect when the machine is reset.</div>
        <br>
        <br>
        <div id="LoadBlock">

@@ -93,7 +93,7 @@
 
 
 /* 'Next' box */
-#NextLineMarker {
+.NextLineMarker {
 	border-left: 1px solid #333333;
 	border-top: 1px solid #333333;
 	border-bottom: 1px solid #333333;
@@ -113,13 +113,13 @@
 	z-index: 2;
 }
 
-#NextLineMarker.shifted {
+.NextLineMarker.shifted {
 	top: 3px;
 	left: -36px;
 }
 
 /* Arrow outline */
-#NextLineMarkerEnd:before {
+.NextLineMarkerEnd:before {
   position: absolute;
   content: "";
   top: -1px;
@@ -132,7 +132,7 @@
 }
 
 /* Arrow interior */
-#NextLineMarkerEnd:after {
+.NextLineMarkerEnd:after {
   position: absolute;
   content: "";
   width: 0;
@@ -147,7 +147,7 @@
 }
 
 /* 'Prev' box */
-#PrevLineMarker {
+.PrevLineMarker {
 	border-left: 1px solid #333333;
 	border-top: 1px solid #333333;
 	border-bottom: 1px solid #333333;
@@ -167,13 +167,13 @@
 	z-index: 1;
 }
 
-#PrevLineMarker.shifted {
+.PrevLineMarker.shifted {
 	top: -1px;
 }
 
 
 /* Arrow outline */
-#PrevLineMarkerEnd:before {
+.PrevLineMarkerEnd:before {
   position: absolute;
   content: "";
   top: -1px;
@@ -186,7 +186,7 @@
 }
 
 /* Arrow interior */
-#PrevLineMarkerEnd:after {
+.PrevLineMarkerEnd:after {
   position: absolute;
   content: "";
   width: 0;
