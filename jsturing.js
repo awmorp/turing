@@ -699,8 +699,13 @@ function SetupVariantCSS()
 
 function ShowResetMsg(b)
 {
-  if( b ) $("#ResetMessage").fadeIn();
-  else $("#ResetMessage").hide();
+  if( b ) {
+    $("#ResetMessage").fadeIn();
+    $("#ResetButton").addClass("glow");
+  } else {
+    $("#ResetMessage").hide();
+    $("#ResetButton").removeClass("glow");
+  }
 }
 
 function LoadFromCloud( sID )
