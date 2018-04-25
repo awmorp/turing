@@ -155,13 +155,16 @@
         </div>
        </div> <!-- div inputProg !-->
        <br>
-       <a href="javascript:" onclick="" title="Save your machine to the cloud for sharing or bookmarking" style="text-decoration: line-through;">Save to the cloud</a><br><span style="font-size: small; color: #686868; font-style: italic;">Save to the cloud is currently unavailable, sorry.</span>
+       <a href="javascript:" onclick="SetSaveMessage( 'Save to the cloud is currently unavailable, sorry.', 2 )" title="Save your machine to the cloud for sharing or bookmarking" style="text-decoration: line-through;">Save to the cloud</a>
        <!--<a href="javascript:" onclick="SaveToCloud();" title="Save your machine to the cloud for sharing or bookmarking">Save to the cloud</a>!-->
        <!--...<a href="javascript:" onclick="testsave(true);">test ok</a>...<a href="javascript:" onclick="testsave(false);">test error</a>!--> <!-- for testing !-->
+       <style>
+       #SaveStatus {display: block; font-size: small; font-style: italic; color: #686868;}
+       </style> <!-- remove this when save to cloud functionality restored !-->
        <div id="SaveStatus">
         <div id="SaveStatusFg">
-         <div id="SaveStatusMsg"></div>
-         <span style="font-size: x-small;"><a href="javascript:" onclick="ClearSaveMessage();">[Close]</a></span>
+         <div id="SaveStatusMsg">Save to the cloud is currently unavailable, sorry.</div><!-- remove div content when save to cloud functionality restored !-->
+         <!--<span style="font-size: x-small;"><a href="javascript:" onclick="ClearSaveMessage();">[Close]</a></span>!--> <!-- uncomment this when save to cloud functionality restored !-->
         </div> 
         <div id="SaveStatusBg"></div>
        </div>

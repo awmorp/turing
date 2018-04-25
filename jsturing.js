@@ -791,6 +791,7 @@ function saveSuccessCallback( oData )
 function saveErrorCallback( oData, sStatus, oRequestObj )
 {
 	debug( 1, "Error: Save failed. AJAX request to Github failed. HTTP response " + oRequestObj.status + " " + oRequestObj.statusText );
+	console.log( oData, sStatus, oRequestObj );
 	SetSaveMessage( "Save failed, sorry :(", 2 );
 }
 
@@ -805,8 +806,10 @@ function SetSaveMessage( sStr, nBgFlash )
 
 function ClearSaveMessage()
 {
+/*
 	$("#SaveStatusMsg").empty();
 	$("#SaveStatus").hide();
+*/ // uncomment when save to cloud functionality restored
 }
 
 function LoadSampleProgram( zName, zFriendlyName, bInitial )
