@@ -747,25 +747,17 @@ function loadErrorCallback( oData, sStatus, oRequestObj )
 function SaveToCloud()
 {
 	SetSaveMessage( "Saving...", null );
-	var oUnpackedObject = SaveMachineSnapshot();
-	var gistApiInput = {
-		"description": "Saved Turing machine state from http://morphett.info/turing/turing.html",
-		"public": false,
-		"files": {
-			"machine.json": {
-				"content": JSON.stringify( oUnpackedObject )
-			}
-		}
-	};
-	$.ajax({
-		url: "https://api.github.com/gists",
-		type: "POST",
-		data: JSON.stringify(gistApiInput),
-		dataType: "json", 
-		contentType: 'application/json; charset=utf-8',
-		success: saveSuccessCallback,
-		error: saveErrorCallback
-	});
+	var oState = SaveMachineSnapshot();
+	
+	var ajaxresult = $.ajax({
+    url: "save.php",
+    type: "POST",
+    data: JSON.stringify( oState ),
+    dataType: "json",
+    contentType: 'application/json; charset=utf-8',
+    success: saveSuccessCallback,
+    error: saveErrorCallback
+  });
 }
 
 function saveSuccessCallback( oData )
@@ -790,8 +782,8 @@ function saveSuccessCallback( oData )
 
 function saveErrorCallback( oData, sStatus, oRequestObj )
 {
-	debug( 1, "Error: Save failed. AJAX request to Github failed. HTTP response " + oRequestObj.status + " " + oRequestObj.statusText );
-	console.log( oData, sStatus, oRequestObj );
+	debug( 1, "Error: Save failed. AJAX request to Github failed. HTTP response " + oRequestObj );
+//	console.log( "oData", oData, "sStatus", sStatus, "oRequestObj", oRequestObj );
 	SetSaveMessage( "Save failed, sorry :(", 2 );
 }
 
@@ -806,10 +798,8 @@ function SetSaveMessage( sStr, nBgFlash )
 
 function ClearSaveMessage()
 {
-/*
 	$("#SaveStatusMsg").empty();
 	$("#SaveStatus").hide();
-*/ // uncomment when save to cloud functionality restored
 }
 
 function LoadSampleProgram( zName, zFriendlyName, bInitial )

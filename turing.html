@@ -155,16 +155,12 @@
         </div>
        </div> <!-- div inputProg !-->
        <br>
-       <a href="javascript:" onclick="SetSaveMessage( 'Save to the cloud is currently unavailable, sorry.', 2 )" title="Save your machine to the cloud for sharing or bookmarking" style="text-decoration: line-through;">Save to the cloud</a>
-       <!--<a href="javascript:" onclick="SaveToCloud();" title="Save your machine to the cloud for sharing or bookmarking">Save to the cloud</a>!-->
+       <a href="javascript:" onclick="SaveToCloud();" title="Save your machine to the cloud for sharing or bookmarking">Save to the cloud</a>
        <!--...<a href="javascript:" onclick="testsave(true);">test ok</a>...<a href="javascript:" onclick="testsave(false);">test error</a>!--> <!-- for testing !-->
-       <style>
-       #SaveStatus {display: block; font-size: small; font-style: italic; color: #686868;}
-       </style> <!-- remove this when save to cloud functionality restored !-->
        <div id="SaveStatus">
         <div id="SaveStatusFg">
-         <div id="SaveStatusMsg">Save to the cloud is currently unavailable, sorry.</div><!-- remove div content when save to cloud functionality restored !-->
-         <!--<span style="font-size: x-small;"><a href="javascript:" onclick="ClearSaveMessage();">[Close]</a></span>!--> <!-- uncomment this when save to cloud functionality restored !-->
+         <div id="SaveStatusMsg"></div>
+         <span style="font-size: x-small;"><a href="javascript:" onclick="ClearSaveMessage();">[Close]</a></span>
         </div> 
         <div id="SaveStatusBg"></div>
        </div>
@@ -206,10 +202,10 @@
    <div id="AboutItemContact" class="AboutItem"><a href="javascript:" onclick="AboutMenuClicked('Contact');">Feedback</a></div>
    <div id="AboutContentContainer">
     <div id="AboutContentTech" class="AboutContent">
-     The Turing machine simulator is written in HTML/Javascript, and uses <a href="http://jquery.com">jQuery</a>.  Saved machines are stored as anonymous GISTs on <a href="https://gist.github.com/">GitHub's GIST</a> service.  You can browse the code <a href="https://github.com/awmorp/jsturing">here on GitHub</a>.
+     The Turing machine simulator is written in Javascript/HTML, and uses <a href="http://jquery.com">jQuery</a>.  Saved machines are stored as Gists on <a href="https://gist.github.com/">GitHub</a>.  You can browse the code <a href="https://github.com/awmorp/jsturing">here on GitHub</a>.
     </div>
     <div id="AboutContentMail" class="AboutContent">
-     <a href="http://www.freelists.org/list/jsturing">Subscribe to the mailing list</a> for occasional updates and news about the Turing machine simulator (typically 1-2 emails per year).
+     <a href="http://www.freelists.org/list/jsturing">Subscribe to the mailing list</a> for occasional updates and news about the Turing machine simulator (typically &lt; 1 email per year).
     </div>
     <div id="AboutContentCopying" class="AboutContent">
      Source code for this simulator is <a href="https://github.com/awmorp/jsturing">available on GitHub</a>.  You are welcome to download, copy, or adapt the code to your own needs.  If you are doing something interesting with it, I'd be happy to hear from you about it.
