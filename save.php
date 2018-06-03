@@ -11,8 +11,8 @@ $token = "XXX";
 header("Content-Type: application/json; charset=utf-8");
 
 // For testing purposes while testing from localhost. Remove Access-Control-* headers when going live.
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
+//header("Access-Control-Allow-Origin: *");
+//header("Access-Control-Allow-Headers: Content-Type");
 
 // Construct Github API request JSON object
 $input = $HTTP_RAW_POST_DATA;
