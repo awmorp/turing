@@ -710,6 +710,9 @@ function ShowResetMsg(b)
 
 function LoadFromCloud( sID )
 {
+	var n = sID.indexOf('&');
+	sID = sID.substring(0, n != -1 ? n : sID.length);
+
 	/* Get data from github */
 	$.ajax({
 		url: "https://api.github.com/gists/" + sID,
