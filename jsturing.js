@@ -1,7 +1,7 @@
 /* JavaScript Turing machine emulator
  * Anthony Morphett - awmorp@gmail.com
  *
- * With contributions from Erez Wanderman and Etai Gross
+ * With contributions from Erez Wanderman, Etai Gross and Greg Bacon
  */
 
 /* Version 2.0 - January 2015 */
