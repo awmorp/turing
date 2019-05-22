@@ -17,10 +17,12 @@ header("Content-Type: application/json; charset=utf-8");
 // Construct Github API request JSON object
 $input = $HTTP_RAW_POST_DATA;
 
+$machineJSON = new stdClass();
 $machineJSON->content = $input;
 $files = array(
          "machine.json" => $machineJSON,
     );
+$githubRequest = new stdClass();
 $githubRequest->description = 'Saved Turing machine state from http://morphett.info/turing/turing.html';
 $githubRequest->public = false;
 $githubRequest->files = $files;
