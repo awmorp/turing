@@ -333,43 +333,43 @@ function ParseLine( sLine, nLineNum )
 	
 	if( aTokens.length < 2 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing &lt;current symbol&gt;!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing <current symbol>!" ;
 		return( oTuple );
 	}
 	if( aTokens[1].length > 1 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": &lt;current symbol&gt; should be a single character!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": <current symbol> should be a single character!" ;
 		return( oTuple );
 	}
 	oTuple.currentSymbol = aTokens[1];
 	
 	if( aTokens.length < 3 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing &lt;new symbol&gt;!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing <new symbol>!" ;
 		return( oTuple );
 	}
 	if( aTokens[2].length > 1 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": &lt;new symbol&gt; should be a single character!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": <new symbol> should be a single character!" ;
 		return( oTuple );
 	}
 	oTuple.newSymbol = aTokens[2];
 	
 	if( aTokens.length < 4 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing &lt;direction&gt;!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing <direction>!" ;
 		return( oTuple );
 	}
 	if( ["l","r","*"].indexOf( aTokens[3].toLowerCase() ) < 0 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": &lt;direction&gt; should be 'l', 'r' or '*'!";
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": <direction> should be 'l', 'r' or '*'!";
 		return( oTuple );
 	}
 	oTuple.action = aTokens[3].toLowerCase();
 
 	if( aTokens.length < 5 ) {
 		oTuple.isValid = false;
-		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing &lt;new state&gt;!" ;
+		oTuple.error = "Syntax error on line " + (nLineNum + 1) + ": missing <new state>!" ;
 		return( oTuple );
 	}
 	oTuple.newState = aTokens[4];
@@ -513,7 +513,7 @@ function LoadMachineSnapshot( oObj )
 /* nBgFlash: 1: flash green for success; 2: flash red for failure; -1: do not flash, even if repeating a message */
 function SetStatusMessage( sString, nBgFlash )
 {
-	$( "#MachineStatusMsgText" ).html( sString );
+	$( "#MachineStatusMsgText" ).text( sString );
   if( nBgFlash > 0 ) {
     $("#MachineStatusMsgBg").stop(true, true).css("background-color",(nBgFlash==1?"#c9f2c9":"#ffb3b3")).show().fadeOut(600);
   }
@@ -526,7 +526,7 @@ function SetStatusMessage( sString, nBgFlash )
 /* SetSyntaxMessage(): display a syntax error message in the textarea */
 function SetSyntaxMessage( msg )
 {
-	$("#SyntaxMsg").html( (msg?msg:"&nbsp;") )
+	$("#SyntaxMsg").text( (msg?msg:"") )
 }
 
 /* RenderTape(): show the tape contents and head position in the MachineTape div */
@@ -586,12 +586,12 @@ function RenderTape()
 
 function RenderState()
 {
-	$("#MachineState").html( sState );
+	$("#MachineState").text( sState );
 }
 
 function RenderSteps()
 {
-	$("#MachineSteps").html( nSteps );
+	$("#MachineSteps").text( nSteps );
 }
 
 function RenderLineMarkers()
