@@ -753,11 +753,12 @@ function SaveToCloud()
 	var oState = SaveMachineSnapshot();
 	
 	var ajaxresult = $.ajax({
-    url: "save.php",
+    url: "https://script.google.com/macros/s/AKfycbzOg5mPCsXDVGVzwmACPRwSvcfWLR2qrEW5Em46wZKO1FVFCAg/exec",
     type: "POST",
     data: JSON.stringify( oState ),
     dataType: "json",
-    contentType: 'application/json; charset=utf-8',
+//    contentType: 'application/json; charset=utf-8',
+    contentType: 'text/plain; charset=utf-8', // Must be text/plain to avoid CORS issues. See https://github.com/tanaikech/taking-advantage-of-Web-Apps-with-google-apps-script#corsinwebapps
     success: saveSuccessCallback,
     error: saveErrorCallback
   });
